@@ -1,0 +1,58 @@
+\documentclass{article}
+% ------------------------------------------
+%       Packages
+% ------------------------------------------
+\usepackage{authblk}
+\usepackage{amsthm}
+\usepackage{natbib}
+\usepackage{xcolor}
+\usepackage[english]{babel}
+\usepackage[verbose]{hyperref}
+\usepackage[
+    top=3cm,     % Top margin
+    bottom=3cm,  % Bottom margin
+    left=3cm,    % Left margin
+    right=3cm    % Right margin
+]{geometry}
+
+% ------------------------------------------
+%       Author's tools
+% ------------------------------------------
+\input{data/meta.tex}
+\input{data/tools.tex}
+
+\begin{document}
+% ------------------------------------------
+%       Title, abstract
+% ------------------------------------------
+\title{\paperTitle}
+\author[1]{
+    \nameHuan
+}
+\author[2]{
+    \nameLe
+    \thanks{Corresponding author, \href{mailto: \emailLe}{\emailLe}}
+}
+\author[2]{\\ \nameNgan}
+\author[2]{\nameDuy}
+\author[3]{\nameClement}
+
+\affil[1]{\affilHuan}
+\affil[2]{\affilLe}
+\affil[3]{\affilClement}
+\date{14/07/2025}
+\maketitle
+\begin{abstract}
+    \paperAbstract
+\end{abstract}
+% ------------------------------------------
+%       Contents
+% ------------------------------------------
+\tableofcontents
+\input{docs/x-notes.tex}
+\input{docs/intro.tex}
+\input{docs/SVM-classical.tex}
+\input{docs/SVM-on-tree.tex}
+\input{docs/experiment.tex}
+
+\end{document}

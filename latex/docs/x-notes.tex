@@ -1,0 +1,36 @@
+\section{Notes}
+\remLE{this section will be removed when we finish the project}
+
+
+
+\textbf{Notations.} 
+We will use the following notations for SVM model on $\RR^n$
+\begin{enumerate}
+    \item Training data $(x_i, y_i) \in \RR^n \times \{-1, 1\}$ for $i=1,..., m$
+    \item Problem fomulation 
+    \begin{equation*}
+        \min \quad 
+        \sum_{i=1}^m \max(1- y_i x_i^T w, 0) + \frac{\lambda}{2}\norm{w}_2^2
+    \end{equation*}
+\end{enumerate}
+
+We will use the following notations for SVM model on tree $\tree$
+\begin{enumerate}
+    \item Tree $\tree = (V, E)$ be a tree with vertex set $V=\{x_1, ...., x_m\} \subset \RR^n$ and edge set $E$, an edge $e$ connecting $x_i$ and $x_j$ is denoted by $e=(x_i, x_j)$.
+    \item Training data $(x_i, y_i) \in \RR^n \times \{-1, 1\}$ for $i=1,..., m$
+    \item Denote $V_+=\{x_i \in V: y_i = +1\}, V_-=\{x_i \in V: y_i = -1\}$
+    \item The SVM on tree aims to minimize the objective function 
+    \begin{align*}
+        \min_{u \in V_+, v \in V_-} \quad & P(u, v) = f(u, v) - \lambda d(u, v)
+    \end{align*}
+    where $d(u, v)$ stands for the margin of the model and $f$ is the loss function defined as $f(u, v) = f_+(u, v) + f_-(u, v)$ with
+    \begin{equation*}
+        f_+(u, v) = \sum_{x \in V_+(u, v)} d(x, u)
+        \text{ and }
+        f_-(u, v) = \sum_{x \in V_-(v, u)} d(x, v).
+    \end{equation*}
+    Here, $V_+(u, v)$ is the set of $+1$-labelled vertices of subtree rooted at $u$ containing $v$ and $V_-(v, u)$ is the set of $-1$-labelled vertices of subtree rooted at $v$ containing $u$.
+
+    \item \remLE{How to define separating plan?}
+
+\end{enumerate}
