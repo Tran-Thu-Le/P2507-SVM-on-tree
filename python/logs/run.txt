@@ -1,0 +1,43 @@
+=== SVM On Tree (C++) vs sklearn SVC — Time & Accuracy on 2N only (parametric data) ===
+(data) sep=6.0, sigma_para=2.5, sigma_perp=2.5, rho=0.0
+
+N=   100 on 2N (orig + projections) | Eval size = 200
+  FIT   SVM-On-Tree: 0.000050s   vs   sklearn SVC: 0.000749s   | Speedup FIT: 14.95x
+  PRED  SVM-On-Tree: 0.000066s   vs   sklearn SVC: 0.000806s   | Speedup PRED: 12.13x
+  ACC   SVM-On-Tree: 0.8800     vs   sklearn SVC: 0.8700
+  Support=(s=23, p=65), Loss=38.4242
+
+N=   200 on 2N (orig + projections) | Eval size = 400
+  FIT   SVM-On-Tree: 0.000085s   vs   sklearn SVC: 0.000927s   | Speedup FIT: 10.86x
+  PRED  SVM-On-Tree: 0.000072s   vs   sklearn SVC: 0.002263s   | Speedup PRED: 31.51x
+  ACC   SVM-On-Tree: 0.9050     vs   sklearn SVC: 0.9050
+  Support=(s=23, p=109), Loss=47.3225
+
+N=   400 on 2N (orig + projections) | Eval size = 800
+  FIT   SVM-On-Tree: 0.000162s   vs   sklearn SVC: 0.002111s   | Speedup FIT: 13.02x
+  PRED  SVM-On-Tree: 0.000083s   vs   sklearn SVC: 0.007848s   | Speedup PRED: 94.66x
+  ACC   SVM-On-Tree: 0.8900     vs   sklearn SVC: 0.8900
+  Support=(s=169, p=390), Loss=101.9323
+
+N=  1000 on 2N (orig + projections) | Eval size = 2000
+  FIT   SVM-On-Tree: 0.000403s   vs   sklearn SVC: 0.008631s   | Speedup FIT: 21.44x
+  PRED  SVM-On-Tree: 0.000111s   vs   sklearn SVC: 0.043054s   | Speedup PRED: 388.27x
+  ACC   SVM-On-Tree: 0.8910     vs   sklearn SVC: 0.8840
+  Support=(s=409, p=636), Loss=261.8288
+
+N=  2000 on 2N (orig + projections) | Eval size = 4000
+  FIT   SVM-On-Tree: 0.000974s   vs   sklearn SVC: 0.033807s   | Speedup FIT: 34.70x
+  PRED  SVM-On-Tree: 0.000159s   vs   sklearn SVC: 0.171057s   | Speedup PRED: 1072.76x
+  ACC   SVM-On-Tree: 0.8885     vs   sklearn SVC: 0.8892
+  Support=(s=150, p=1749), Loss=522.4160
+
+N=  4000 on 2N (orig + projections) | Eval size = 8000
+  FIT   SVM-On-Tree: 0.002013s   vs   sklearn SVC: 0.122296s   | Speedup FIT: 60.75x
+  PRED  SVM-On-Tree: 0.000296s   vs   sklearn SVC: 0.622379s   | Speedup PRED: 2101.60x
+  ACC   SVM-On-Tree: 0.8885     vs   sklearn SVC: 0.8885
+  Support=(s=169, p=2243), Loss=1091.3013
+
+Gợi ý:
+- Tăng --sep hoặc giảm --sigma-para để giảm chồng lắp theo spine -> ACC tăng mạnh.
+- Giữ --rho=0 để đơn giản; --sigma-perp có thể lớn mà không hại Tree (cắt theo t).
+- So sánh công bằng hơn với SVC tuyến tính: thử thêm baseline linear (nếu cần).
