@@ -63,7 +63,7 @@ then the C++ module has been built successfully.
 Go back to the repository root and run:
 ```bash
 cd ..
-python python/benchmark_svm_tree_vs_svc_2n.py --sizes 50 100 200 500 1000 2000 --repeats 7
+python python/benchmark_svm_tree_vs_svc_2n.py --sizes 50 100 200 500 1000 2000 --repeats 7 > python/logs/run.txt
 ```
 Arguments:
 - `--sizes`: list of N values to test (number of training points).
