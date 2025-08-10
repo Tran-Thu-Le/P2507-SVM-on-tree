@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "pybind11>=2.12.0", "numpy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "svm-on-tree-cpp"
+version = "0.1.0"
+description = "SVM On Tree core in C++ with a Python interface (pybind11)"
+requires-python = ">=3.9"
+dependencies = ["numpy"]
+
+[tool.scikit-build]
+wheel.expand-macos-universal-tags = true
