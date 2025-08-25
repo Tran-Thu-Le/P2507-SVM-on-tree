@@ -147,80 +147,59 @@ L(s,p_1) \geq L(s,p_2).
 This implies that among non-adjacent pairs, there always exists an adjacent pair with better or equal loss, establishing the adjacency property.
 \end{proof}
 
-\subsection{Detailed derivation of f(s,p1) and f(s,p2)}
+\subsection{Detailed derivation of {$f(s,p1)$ and $f(s,p2)$}}
 
-From the construction of the tree we recall that:
-\begin{itemize}
-    \item $dis(x,y)$ denotes the distance between two nodes $x$ and $y$.
-    \item $tol(x,y)$ denotes the sum of distances from $x$ to all descendant nodes with the same label as $x$, when the tree is rooted at $y$. \remLE{we should carefully define this concept.}
-\end{itemize}
+Define $tol(x,y)$ as the sum of distances from $x$ to all descendant nodes with the same label as $x$, when the tree is rooted at $y$.
 
-\paragraph{Computation of $f(s,p_1)$.}
-Consider the path from $s$ to $p_1$. By definition,
-\[
-f(s,p_1) = tol(p_2,p_1) + n'(p_1,s)\cdot y,
-\]
-where the second term counts the contribution of the descendants along the branch from $p_1$ back to $s$.
+We assume without loss of generality that $s \in V_+$ and $p_1, p_2\in V_-$ and $p_2$ is in the path connecting $s$ and $p_1$, \ie $d(s, p_1) = d(s, p_2) + d(p_2, p_1)$. 
 
-\paragraph{Computation of $f(s,p_2)$.}
-Similarly, consider the path from $s$ to $p_2$. We obtain
-\[
-f(s,p_2) = tol(p_4,p_1) + n'(p_2,s)\cdot (x+z).
-\]
-Since the contribution of $p_3$ must be subtracted, this simplifies to
-\[
-f(s,p_2) = tol(p_2,p_1) - d(p_2,p_3).
-\]
+Recall the definition of total noise, see XXX, we have 
+\begin{align*}
+    f(s, p_1) & = f_+(s, p_1) + f_-(p_1, s)\\ 
+    f(s, p_2) & = f_+(s, p_2) + f_-(p_2, s).
+\end{align*}
+Since $f_+(s, p_1) = f_+(s, p_2)$, \remLE{Why? Explain.}, then 
+\begin{equation*}
+    f(s, p_1) - f(s, p_1) = f_-(p_1, s) - f_-(p_2, s).
+\end{equation*}
 
-\paragraph{Relation between $f(s,p_1)$ and $f(s,p_2)$.}
-Combining the above,
-\[
-f(s,p_1) = f(s,p_2) + n'(p_1,s)\cdot y + d(p_2,p_3).
-\]
+Recall the definition of negative noise, we have
+\begin{equation*}
+    f_-(p_1, s) = \sum_{v\in V_-(p_1, s)} d(v, p_1)
+\end{equation*}
 
-Thus, the loss terms $L(s,p_1)$ and $L(s,p_2)$ can later be compared directly by expanding with these expressions.
 
-We have
-\begin{align}
-f(s,p_1) &= tol(p_2,p_1) + n'(p_1,s)\cdot y, \\
-f(s,p_2) &= tol(p_4,p_1) + n'(p_2,s)\cdot (x+z) \\
-         &= tol(p_2,p_1) - d(p_2,p_3).
-\end{align}
+Define the vertex set 
+\begin{equation*}
+    R = V_-(p_1, s) \setminus V_-(p_2, s).
+\end{equation*}
+Then 
+\begin{align*}
+    f_-(p_1, s)
+    & = \sum_{v\in V_-(p_1, s)} d(v, p_1)\\
+    & = \sum_{v\in V_-(p_2, s)} d(v, p_1) + \sum_{v\in R} d(v, p_1)\\
+    & = \sum_{v\in V_-(p_2, s)} [d(v, p_2) + d(p_2, p_1)] + \sum_{v\in R} d(v, p_1)\\
+    & = f_-(p_2, s) + d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1)
+\end{align*}
+or 
+\begin{equation*}
+    f_-(p_1, s) - f_-(p_2, s) = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1).
+\end{equation*}
 
-Hence,
-\[
-f(s,p_1) = f(s,p_2) + n'(p_1,s)\cdot y + d(p_2,p_3).
-\]
+Now, we have 
+\begin{align*}
+    L_1(s, p_1) - L_1(s, p_2) 
+    & = f(s, p_1) - f(s, p_2) - (d(s, p_1) -d(s, p_2))\\
+    & = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1) - d(p_2, p_1)\\
+    & = d(p_2, p_1) (|V_-(p_2,s)| - 1) + \sum_{v\in R} d(v, p_1).
+\end{align*}
+Since $V_-(p_2,s)$ contains at least a vertex (say $p_1$), we should have $|V_-(p_2,s)| - 1 \geq 0$. Thus, we obtain the nonnegativity. Therefore, 
+\begin{equation*}
+    L_1(s, p_1) \geq L_1(s, p_2).
+\end{equation*}
 
-Also,
-\[
-d(s,p_1) = d(s,p_2) + y.
-\]
-
-Therefore,
-\begin{align}
-L_1 &= L(s,p_1) = f(s,p_1) - d(s,p_1), \\
-L_2 &= L(s,p_2) = f(s,p_2) - d(s,p_2).
-\end{align}
-
-Substituting gives
-\begin{align}
-L_1 &= f(s,p_2) - d(s,p_2) + n'(p_1,s)\cdot y + d(p_2,p_3) + y, \\
-L_2 &= f(s,p_2) - d(s,p_2).
-\end{align}
-
-Thus,
-\[
-L_1 = L_2 + n'(p_1,s)\cdot y + d(p_2,p_3) + y.
-\]
-
-Since $n'(p_1,s)\cdot y \ge 0$, $d(p_2,p_3) \ge 0$, and $y > 0$, it follows that
-\[
-L_1 > L_2.
-\]
-
-\paragraph{Conclusion.}  
-The optimal support pair $(s,p)$ must consist of two \emph{adjacent} vertices on the spine.
+ 
+The optimal support pair $(s,p)$ must consist of two adjacent vertices on the spine \remLE{prove that "on spine" not "on spoke".}
 
 \subsection{Algorithm and Computational Complexity}
 
