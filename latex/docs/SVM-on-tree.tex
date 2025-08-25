@@ -1,40 +1,6 @@
-% \section{SVM on tree}
-% \remLE{Huan do this}
-
-% \subsection{Modeling}
-% \subsection{MaFor theFor the analysisFor example, referring to Figure~\ref{fig:tree_nodes}:
-\[
-\mathrm{subtree\_cost}(P_2,P_1) = \mathrm{dist}(P_4,P_2) + \mathrm{dist}(P_3,P_2).
-\]
-
-\subsubsection{Adjacency Property}
-
-We now establish a fundamental property that significantly reduces the search space for optimal support pairs.
-
-\begin{theorem}[Adjacency Property]
-\label{thm:adjacency}
-For $\lambda = 1$, the optimal support pair $(s^*,p^*)$ consists of two adjacent vertices on the spine.
-\end{theorem}
-
-\begin{proof}
-Consider two candidate support pairs: $(s,P_1)$ and $(s,P_2)$ where $P_1$ and $P_2$ are consecutive spine vertices as shown in Figure~\ref{fig:tree_nodes}.he following notation:
-\begin{align}
-\mathrm{dist}(x,y) &: \text{distance between nodes } x \text{ and } y \text{ in the tree}, \\
-\mathrm{subtree\_cost}(x,y) &: \text{sum of distances from } x \text{ to all descendants} \nonumber \\
-&\quad \text{with the same label as } x, \text{ when rooted at } y.
-\end{align}
-
-For example, referring to Figure~\ref{fig:tree_nodes}:, we introduce the following notation:
-\begin{align}
-\mathrm{dist}(x,y) &: \text{distance between nodes } x \text{ and } y \text{ in the tree}, \\
-\mathrm{subtree\_cost}(x,y) &: \text{sum of distances from } x \text{ to all descendants} \nonumber \\
-&\quad \text{with the same label as } x, \text{ when rooted at } y.
-\end{align}
-
-For example, referring to Figure~\ref{fig:tree_nodes}:ties}
-% \subsection{Dynamic programming}
-
 \section{SVM on Tree}
+\label{sec:svm_on_tree}
+\label{sec:svm_tree}
 
 In this section, we present a novel approach to binary classification using Support Vector Machines (SVM) on tree structures. Our method constructs an augmented tree from the data and formulates the classification problem as an optimization over support pairs on this tree.
 
@@ -97,11 +63,11 @@ In this subsection, we establish the key theoretical properties of our SVM on tr
   \centering
   \begin{tikzpicture}[scale=1.5, thick]
     % Vertices
-    \node[draw, circle, fill=black, inner sep=2pt, label=above:$P_4$] (P4) at (0,0) {};
+    \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_4$] (P4) at (0,0) {};
     \node[draw, circle, fill=black, inner sep=2pt, label=above:$s$] (S) at (2,0) {};
-    \node[draw, circle, fill=black, inner sep=2pt, label=above:$P_2$] (P2) at (4,0) {};
-    \node[draw, circle, fill=black, inner sep=2pt, label=above:$P_1$] (P1) at (6,0) {};
-    \node[draw, circle, fill=black, inner sep=2pt, label=below:$P_3$] (P3) at (4,-1.5) {};
+    \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_2$] (P2) at (4,0) {};
+    \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_1$] (P1) at (6,0) {};
+    \node[draw, circle, fill=black, inner sep=2pt, label=below:$p_3$] (P3) at (4,-1.5) {};
 
     % Edges with labels
     \draw (P4) -- node[above] {$z$} (S);
@@ -109,7 +75,7 @@ In this subsection, we establish the key theoretical properties of our SVM on tr
     \draw (P2) -- node[above] {$y$} (P1);
     \draw (P2) -- (P3);
   \end{tikzpicture}
-  \caption{Tree structure illustrating nodes $s$, $P_1$, $P_2$, $P_3$, and $P_4$ with edge weights $x$, $y$, and $z$.}
+  \caption{Tree structure illustrating nodes $s$, $p_1$, $p_2$, $p_3$, and $p_4$ with edge weights $x$, $y$, and $z$.}
   \label{fig:tree_nodes}
 \end{figure}
 
@@ -117,14 +83,14 @@ In this subsection, we establish the key theoretical properties of our SVM on tr
 
 For the analysis, we introduce the following notation:
 \begin{align}
-\mathrm{dist}(x,y) &: \text{distance between nodes } x \text{ and } y \text{ in the tree}, \\
+d(x,y) &: \text{distance between nodes } x \text{ and } y \text{ in the tree}, \\
 \mathrm{subtree\_cost}(x,y) &: \text{sum of distances from } x \text{ to all descendants} \nonumber \\
 &\quad \text{with the same label as } x, \text{ when rooted at } y.
 \end{align}
 
 For example, referring to Figure~\ref{fig:tree_nodes}:
 \[
-\mathrm{subtree\_cost}(P_2,P_1) = \mathrm{dist}(P_4,P_2) + \mathrm{dist}(P_3,P_2).
+\mathrm{subtree\_cost}(p_2,p_1) = d(p_4,p_2) + d(p_3,p_2).
 \]
 
 \subsubsection{Adjacency Property}
@@ -137,40 +103,40 @@ For $\lambda = 1$, the optimal support pair $(s^*,p^*)$ consists of two adjacent
 \end{theorem}
 
 \begin{proof}
-Consider two candidate support pairs: $(s,P_1)$ and $(s,P_2)$ where $P_1$ and $P_2$ are consecutive spine vertices as shown in Figure~\ref{fig:tree_nodes}.
+Consider two candidate support pairs: $(s,p_1)$ and $(s,p_2)$ where $p_1$ and $p_2$ are consecutive spine vertices as shown in Figure~\ref{fig:tree_nodes}.
 
 From the tree structure, we can express:
 \begin{align}
-f(s,P_1) &= \mathrm{subtree\_cost}(P_2,P_1) + n'(P_1,s) \cdot y, 
-f(s,P_2) &= \mathrm{subtree\_cost}(P_2,P_1) - \mathrm{dist}(P_2,P_3),
+f(s,p_1) &= \mathrm{subtree\_cost}(p_2,p_1) + n'(p_1,s) \cdot y, \\
+f(s,p_2) &= \mathrm{subtree\_cost}(p_2,p_1) - d(p_2,p_3),
 \end{align}
-where $n'(P_1,s)$ represents the number of vertices with the same label as $P_1$ in the relevant subtree.
+where $n'(p_1,s)$ represents the number of vertices with the same label as $p_1$ in the relevant subtree.
 
 Therefore:
 \[
-f(s,P_1) = f(s,P_2) + n'(P_1,s) \cdot y + \mathrm{dist}(P_2,P_3).
+f(s,p_1) = f(s,p_2) + n'(p_1,s) \cdot y + d(p_2,p_3).
 \]
 
-Since $\mathrm{dist}(s,P_1) = \mathrm{dist}(s,P_2) + y$, the loss functions are:
+Since $d(s,p_1) = d(s,p_2) + y$, the loss functions are:
 \begin{align}
-L(s,P_1) &= f(s,P_1) - \mathrm{dist}(s,P_1), 
-L(s,P_2) &= f(s,P_2) - \mathrm{dist}(s,P_2).
+L(s,p_1) &= f(s,p_1) - d(s,p_1), \\
+L(s,p_2) &= f(s,p_2) - d(s,p_2).
 \end{align}
 
 Substituting the expressions:
 \[
-L(s,P_1) = L(s,P_2) + n'(P_1,s) \cdot y + \mathrm{dist}(P_2,P_3) - y.
+L(s,p_1) = L(s,p_2) + n'(p_1,s) \cdot y + d(p_2,p_3) - y.
 \]
 
-Since $n'(P_1,s) \cdot y \geq 0$, $\mathrm{dist}(P_2,P_3) \geq 0$, and typically $n'(P_1,s) \geq 1$, we have:
+Since $n'(p_1,s) \cdot y \geq 0$, $d(p_2,p_3) \geq 0$, and typically $n'(p_1,s) \geq 1$, we have:
 \[
-L(s,P_1) \geq L(s,P_2).
+L(s,p_1) \geq L(s,p_2).
 \]
 
 This implies that among non-adjacent pairs, there always exists an adjacent pair with better or equal loss, establishing the adjacency property.
 \end{proof}
 
-\subsection{Detailed derivation of $f(s,p_1)$ and $f(s,p_2)$}
+\subsection{Detailed derivation of f(s,p1) and f(s,p2)}
 
 From the construction of the tree we recall that:
 \begin{itemize}
@@ -192,13 +158,13 @@ f(s,p_2) = tol(p_4,p_1) + n'(p_2,s)\cdot (x+z).
 \]
 Since the contribution of $p_3$ must be subtracted, this simplifies to
 \[
-f(s,p_2) = tol(p_2,p_1) - dis(p_2,p_3).
+f(s,p_2) = tol(p_2,p_1) - d(p_2,p_3).
 \]
 
 \paragraph{Relation between $f(s,p_1)$ and $f(s,p_2)$.}
 Combining the above,
 \[
-f(s,p_1) = f(s,p_2) + n'(p_1,s)\cdot y + dis(p_2,p_3).
+f(s,p_1) = f(s,p_2) + n'(p_1,s)\cdot y + d(p_2,p_3).
 \]
 
 Thus, the loss terms $L(s,p_1)$ and $L(s,p_2)$ can later be compared directly by expanding with these expressions.
@@ -207,37 +173,37 @@ We have
 \begin{align}
 f(s,p_1) &= tol(p_2,p_1) + n'(p_1,s)\cdot y, \\
 f(s,p_2) &= tol(p_4,p_1) + n'(p_2,s)\cdot (x+z) \\
-         &= tol(p_2,p_1) - dis(p_2,p_3).
+         &= tol(p_2,p_1) - d(p_2,p_3).
 \end{align}
 
 Hence,
 \[
-f(s,P_1) = f(s,P_2) + n'(P_1,s)\cdot y + dis(P_2,P_3).
+f(s,p_1) = f(s,p_2) + n'(p_1,s)\cdot y + d(p_2,p_3).
 \]
 
 Also,
 \[
-dis(s,P_1) = dis(s,P_2) + y.
+d(s,p_1) = d(s,p_2) + y.
 \]
 
 Therefore,
 \begin{align}
-L_1 &= L(s,P_1) = f(s,P_1) - dis(s,P_1), \\
-L_2 &= L(s,P_2) = f(s,P_2) - dis(s,P_2).
+L_1 &= L(s,p_1) = f(s,p_1) - d(s,p_1), \\
+L_2 &= L(s,p_2) = f(s,p_2) - d(s,p_2).
 \end{align}
 
 Substituting gives
 \begin{align}
-L_1 &= f(s,P_2) - dis(s,P_2) + n'(P_1,s)\cdot y + dis(P_2,P_3) + y, \\
-L_2 &= f(s,P_2) - dis(s,P_2).
+L_1 &= f(s,p_2) - d(s,p_2) + n'(p_1,s)\cdot y + d(p_2,p_3) + y, \\
+L_2 &= f(s,p_2) - d(s,p_2).
 \end{align}
 
 Thus,
 \[
-L_1 = L_2 + n'(P_1,s)\cdot y + dis(P_2,P_3) + y.
+L_1 = L_2 + n'(p_1,s)\cdot y + d(p_2,p_3) + y.
 \]
 
-Since $n'(P_1,s)\cdot y \ge 0$, $dis(P_2,P_3) \ge 0$, and $y > 0$, it follows that
+Since $n'(p_1,s)\cdot y \ge 0$, $d(p_2,p_3) \ge 0$, and $y > 0$, it follows that
 \[
 L_1 > L_2.
 \]
@@ -275,25 +241,25 @@ Since our augmented tree has a spine-and-spoke structure (essentially a path wit
 \caption{SVM on Tree Algorithm}
 \label{alg:svm_tree}
 \begin{algorithmic}[1]
-\State \textbf{Input:} Labeled dataset $\{(x_i,y_i)\}_{i=1}^n \subset \mathbb{R}^d \times \{-1,+1\}$
-\State \textbf{Output:} Optimal support pair $(s^*,p^*)$ and decision boundary
+\STATE \textbf{Input:} Labeled dataset $\{(x_i,y_i)\}_{i=1}^n \subset \mathbb{R}^d \times \{-1,+1\}$
+\STATE \textbf{Output:} Optimal support pair $(s^*,p^*)$ and decision boundary
 
-\State Compute class means $\mu_-$, $\mu_+$ and spine direction $w$
-\State Project all points: $x_i' = \mu_- + \langle x_i-\mu_-, w\rangle w$ for $i = 1,\ldots,n$
-\State Sort projections $\{x_i'\}$ by coordinate $t_i = \langle x_i-\mu_-, w\rangle$
-\State Construct augmented tree $T$ with spoke and spine edges
-\State Initialize $L_{\min} = \infty$, $(s^*,p^*) = \emptyset$
+\STATE Compute class means $\mu_-$, $\mu_+$ and spine direction $w$
+\STATE Project all points: $x_i' = \mu_- + \langle x_i-\mu_-, w\rangle w$ for $i = 1,\ldots,n$
+\STATE Sort projections $\{x_i'\}$ by coordinate $t_i = \langle x_i-\mu_-, w\rangle$
+\STATE Construct augmented tree $T$ with spoke and spine edges
+\STATE Initialize $L_{\min} = \infty$, $(s^*,p^*) = \emptyset$
 
-\For{each pair of adjacent spine vertices $(s,p)$ with $y(s) \neq y(p)$}
-    \State Compute $f(s,p)$ using two DFS passes
-    \State Calculate $L(s,p) = f(s,p) - d(s,p)$
-    \If{$L(s,p) < L_{\min}$}
-        \State $L_{\min} = L(s,p)$
-        \State $(s^*,p^*) = (s,p)$
-    \EndIf
-\EndFor
+\FOR{each pair of adjacent spine vertices $(s,p)$ with $y(s) \neq y(p)$}
+    \STATE Compute $f(s,p)$ using two DFS passes
+    \STATE Calculate $L(s,p) = f(s,p) - d(s,p)$
+    \IF{$L(s,p) < L_{\min}$}
+        \STATE $L_{\min} = L(s,p)$
+        \STATE $(s^*,p^*) = (s,p)$
+    \ENDIF
+\ENDFOR
 
-\State \textbf{return} $(s^*,p^*)$ and perpendicular bisector of segment $s^*p^*$
+\STATE \textbf{return} $(s^*,p^*)$ and perpendicular bisector of segment $s^*p^*$
 \end{algorithmic}
 \end{algorithm}
 

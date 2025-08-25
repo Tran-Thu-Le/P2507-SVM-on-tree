@@ -1,4 +1,21 @@
 \section{Introduction}
-\remLE{Ngan do this}
+
+Support Vector Machines (SVMs) have established themselves as one of the most powerful and theoretically well-founded approaches to machine learning since their introduction by Vapnik and colleagues in the 1990s. The fundamental principle of SVMs lies in finding an optimal separating hyperplane that maximizes the margin between different classes, providing both strong theoretical guarantees and excellent empirical performance across a wide range of applications.
+
+Traditional SVMs excel in scenarios where data can be effectively separated by linear or kernel-induced nonlinear boundaries in high-dimensional feature spaces. However, many real-world datasets exhibit complex geometric structures that are not naturally captured by conventional distance metrics or kernel functions. In particular, when data points are embedded in or naturally associated with tree-like or hierarchical structures, standard SVM approaches may fail to exploit the inherent geometric relationships that could improve classification performance.
+
+Tree structures arise naturally in numerous domains: phylogenetic trees in bioinformatics represent evolutionary relationships between species, social networks often exhibit hierarchical community structures, and many machine learning problems involve data with natural tree-like dependencies. In such contexts, the Euclidean distance used by traditional SVMs may not reflect the true similarity or dissimilarity between data points, as it ignores the underlying structural constraints.
+
+This paper introduces a novel extension of Support Vector Machines that operates directly on tree structures, which we call \textbf{SVM on Tree}. Our approach constructs an augmented tree representation from the original data and formulates the classification problem as an optimization over support pairs within this tree structure. The key innovation lies in developing a tree-based distance metric that respects the geometric constraints of the tree while maintaining the theoretical foundations of SVM optimization.
+
+Our main contributions are:
+\begin{enumerate}
+\item A novel tree-based SVM formulation that constructs an augmented tree from input data and optimizes support vector selection within this structure.
+\item A theoretical analysis establishing the adjacency property, which dramatically reduces the computational complexity from $O(n^2)$ to $O(n)$ support pair candidates.
+\item An efficient algorithm with $O(nd + n\log n)$ time complexity that leverages dynamic programming techniques for objective function evaluation.
+\item Empirical validation demonstrating the effectiveness of our approach on datasets with inherent tree-like structures.
+\end{enumerate}
+
+The remainder of this paper is organized as follows: Section~\ref{sec:classical_svm} reviews the foundations of classical SVM theory, Section~\ref{sec:svm_on_tree} presents our SVM on Tree methodology, Section~\ref{sec:experiments} provides experimental validation, and Section~\ref{sec:conclusion} concludes with directions for future work.
 
 

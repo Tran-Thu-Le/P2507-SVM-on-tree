@@ -33,7 +33,7 @@
 \usepackage{tikz, tkz-tab}
 \usetikzlibrary{positioning}
 \usepackage{subcaption}
-\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+% \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 % \usepackage[ruled]{algorithm2e}
 % \usepackage{algorithm}
 % \usepackage{algorithmic}
@@ -160,4 +160,11 @@
 % ADD CONTENTS
 \newcommand{\addLE}[1]{\textcolor{blue}{\small [LE: #1]}}
 \newcommand{\addTUNG}[1]{\textcolor{red}{\small [TUNG: #1]}}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{problem}{Problem}
 
