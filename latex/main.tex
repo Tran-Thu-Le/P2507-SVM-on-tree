@@ -14,7 +14,12 @@
     left=3cm,    % Left margin
     right=3cm    % Right margin
 ]{geometry}
-
+% Define theorem-style environments with numbering per section
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
 % ------------------------------------------
 %       Author's tools
 % ------------------------------------------
