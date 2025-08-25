@@ -1,114 +1,328 @@
-\section{SVM on tree}
-\remLE{Huan do this}
+% \section{SVM on tree}
+% \remLE{Huan do this}
 
-In this section, we aim to develop an efficient algorithm for solving SVM model in linear by projecting the training points onto a tree. 
+% \subsection{Modeling}
+% \subsection{MaFor theFor the analysisFor example, referring to Figure~\ref{fig:tree_nodes}:
+\[
+\mathrm{subtree\_cost}(P_2,P_1) = \mathrm{dist}(P_4,P_2) + \mathrm{dist}(P_3,P_2).
+\]
 
+\subsubsection{Adjacency Property}
 
-\subsection{Projection onto tree}
+We now establish a fundamental property that significantly reduces the search space for optimal support pairs.
 
-Given a training data $(x_i, y_i) \in \RR^n \times \{-1, 1\}$ for $i=1,..., m$. We now construct a simple tree to approximate the training data.
-The idea is simple, we first find the center of positive group, say $c^+$ and center of negative group, say $c^-$. Let $\Delta$ be the line passsing through the two centers. We then porject $x_i$ onto $\Delta$, and obtain $\hat{x}_i$. So the set of $\hat{x}_i$ form a path graph. We further add edges $e_i = (x_i, \hat{x}_i)$ to the graph. The resulting graph form a tree. So, In this tree, we have
-\begin{align*}
-    V & = \{x_i: i =1,..., m\} \cup \{\hat{x}_i: i=1,..., m\},\\
-    E & = \{e_i: i =1,..., m\} \cup \{\hat{e}_i: i=2,..., m\}.\\
-\end{align*}
-We now specify the label of vertices and edge lengths. We set $L(x_i) = L(\hat{x}_i) = y_i$ for all $i=1,..., m$ and for the edge length we have two options to define $ell(e_i)$
-\begin{equation*}
-    \ell(e_i) = \|x_i - \hat{x}_i\|_2.
-\end{equation*}
-and 
-\begin{equation*}
-    \ell(e_i) = 0.
-\end{equation*}
-The latter setting shows that the model is actually a generalization for 1D SVM. Specifically, if we set $ell(e_i)=0$ for 
+\begin{theorem}[Adjacency Property]
+\label{thm:adjacency}
+For $\lambda = 1$, the optimal support pair $(s^*,p^*)$ consists of two adjacent vertices on the spine.
+\end{theorem}
 
-$V = \{x_i: i =1,..., m\} \cup \{\hat{x}_i: i=1,..., m\}$. 
-We assign label $y_i$ for $\hat{x}_i$ for all $i=1,..., m$.
-Without loss of generality, we may assume that $\hat{x}_i$ will be sorted in a certain order, 
-\begin{equation*}
-    \hat{x}_1 \leq ...\leq \hat{x}_n.
-\end{equation*}
+\begin{proof}
+Consider two candidate support pairs: $(s,P_1)$ and $(s,P_2)$ where $P_1$ and $P_2$ are consecutive spine vertices as shown in Figure~\ref{fig:tree_nodes}.he following notation:
+\begin{align}
+\mathrm{dist}(x,y) &: \text{distance between nodes } x \text{ and } y \text{ in the tree}, \\
+\mathrm{subtree\_cost}(x,y) &: \text{sum of distances from } x \text{ to all descendants} \nonumber \\
+&\quad \text{with the same label as } x, \text{ when rooted at } y.
+\end{align}
 
-We now detail the computations. The centers $c^+$ and $c^-$ can be copmputed as follows
-\begin{equation*}
-    c^+ = \frac{1}{|I_+|} \sum_{i \in I_+} x_i 
-    \text{ and }
-    c^- = \frac{1}{|I_-|} \sum_{i \in I_-} x_i 
-\end{equation*}
+For example, referring to Figure~\ref{fig:tree_nodes}:, we introduce the following notation:
+\begin{align}
+\mathrm{dist}(x,y) &: \text{distance between nodes } x \text{ and } y \text{ in the tree}, \\
+\mathrm{subtree\_cost}(x,y) &: \text{sum of distances from } x \text{ to all descendants} \nonumber \\
+&\quad \text{with the same label as } x, \text{ when rooted at } y.
+\end{align}
 
-\subsection{SVM problem on tree}
+For example, referring to Figure~\ref{fig:tree_nodes}
+% \subsection{Dynamic programming}
+\end{proof}
+\section{SVM on Tree}
 
-Let $T=(V, E)$ be a tree. Each vertex $v \in V$ has a label denoted by $L(v) \in \{-1, +1\}$. 
-Denote $V_+=\{v \in V: L(v)= +1\}, V_-=\{v \in V: L(v) = -1\}$.
-The SVM on tree aims to find two vertices $u \in V_+$ and $v \in V_-$, say \emph{support nodes}, which stimuate the role of support vector in the classical SVM models.
+In this section, we present a novel approach to binary classification using Support Vector Machines (SVM) on tree structures. Our method constructs an augmented tree from the data and formulates the classification problem as an optimization over support pairs on this tree.
 
-In this case, we say that $(v_+, v_-)$ form a \emph{support nodes} if it minimizes the following two objectives
+\subsection{Problem Formulation}
+
+\subsubsection{Data Representation and Spine Construction}
+
+Given a labeled dataset $\{(x_i,y_i)\}_{i=1}^n \subset \mathbb{R}^d \times \{-1,+1\}$, we define the class means as:
+\begin{align}
+\mu_- &= \frac{1}{|V_-|}\sum_{y_i=-1} x_i, \\
+\mu_+ &= \frac{1}{|V_+|}\sum_{y_i=+1} x_i,
+\end{align}
+where $V_- = \{i : y_i = -1\}$ and $V_+ = \{i : y_i = +1\}$.
+
+The unit spine direction is computed as:
+\[
+w = \frac{\mu_+ - \mu_-}{\|\mu_+ - \mu_-\|}.
+\]
+
+For each data point $x_i$, we compute its projection onto the line passing through $\mu_-$ in direction $w$:
+\begin{align}
+x_i' &= \mu_- + \langle x_i-\mu_-,\, w\rangle\, w, \\
+t_i &= \langle x_i-\mu_-,\, w\rangle.
+\end{align}
+
+The projected points $\{x_i'\}$ are then sorted by their projection coordinates $t_i$.
+
+\subsubsection{Augmented Tree Construction}
+
+We construct an augmented tree $T=(V,E)$ with two types of edges:
 \begin{enumerate}
-    \item The margin $d(v_+, v_-)$
-    \item The noise $f(v_+, v_-)$
-\end{enumerate}
-We now define the noise.
-
-We first define the noisy nodes.
-A vertex $v \in V_+$ is said to be a positive noise \wrt to support nodes $(v_+, v_-)$ if $T(v_+, v_-)$.  We denote the set of positive noises \wrt $(v_+, v_-)$ as $V_+(v_+, v_-)$. Similarly, we define $V_-(v_-, v_+)$ as the set of negative noises \wrt $(v_+, v_-)$.
-Define 
-\begin{align*}
-    N_+ & = \{v \in T(v_+, v_-): L(v) = + 1\} = T(v_+, v_-) \cap V_+\\
-    N_- & = \{v \in T(v_-, v_+): L(v) = - 1\} = T(v_-, v_+) \cap V_-.\\
-\end{align*}
-Recall that $T(u, v)$ is a subtree root at $u$ and containing $v$.
-
-We next define the partial noise.  
-The positive noise is defined as the total distance from $v_+$ to nodes in $N_+$. The negative noise is defined similarly.
-\begin{equation*}
-    f_+(v_+, v_-) = \sum_{x \in N_+} d(x, u)
-    \text{ and }
-    f_-(v_+, v_-) = \sum_{x \in N_-} d(x, v).
-\end{equation*}
-The total noise is then given by
-\begin{equation*}
-    f(v_+, v_-) = f_+(v_+, v_-) + f_-(v_+, v_-).
-\end{equation*}
-
-Problem formulation 
-\begin{equation*}
-    \min_{v_+ \in V_+, v_- in V_-} \quad 
-    f(v_+, v_-) - d(v_+, v_-).
-\end{equation*}
-
-We will use the following notations for SVM model on tree $\tree$
-\begin{enumerate}
-    \item Tree $\tree = (V, E)$ be a tree with vertex set $V=\{x_1, ...., x_m\} \subset \RR^n$ and edge set $E$, an edge $e$ connecting $x_i$ and $x_j$ is denoted by $e=(x_i, x_j)$.
-    \item Training data $(x_i, y_i) \in \RR^n \times \{-1, 1\}$ for $i=1,..., m$
-    \item Denote $V_+=\{x_i \in V: y_i = +1\}, V_-=\{x_i \in V: y_i = -1\}$
-    \item The SVM on tree aims to minimize the objective function 
-    \begin{align*}
-        \min_{u \in V_+, v \in V_-} \quad & P(u, v) = f(u, v) - \lambda d(u, v)
-    \end{align*}
-    where $d(u, v)$ stands for the margin of the model and $f$ is the loss function defined as $f(u, v) = f_+(u, v) + f_-(u, v)$ with
-    \begin{equation*}
-        f_+(u, v) = \sum_{x \in V_+(u, v)} d(x, u)
-        \text{ and }
-        f_-(u, v) = \sum_{x \in V_-(v, u)} d(x, v).
-    \end{equation*}
-    Here, $V_+(u, v)$ is the set of $+1$-labelled vertices of subtree rooted at $u$ containing $v$ and $V_-(v, u)$ is the set of $-1$-labelled vertices of subtree rooted at $v$ containing $u$.
-
-    \item \remLE{How to define separating plan?}
-
+\item \textbf{Spoke edges}: Connect each original point $x_i$ to its projection $x_i'$, weighted by the Euclidean distance $\|x_i-x_i'\|$.
+\item \textbf{Spine edges}: Connect consecutive projections in the sorted order, weighted by their Euclidean distance in $\mathbb{R}^d$.
 \end{enumerate}
 
+For any vertices $u,v \in V$, let $d(u,v)$ denote the shortest path distance (sum of edge weights) between $u$ and $v$ in $T$.
 
+\subsubsection{Objective Function}
 
-% \section{Property and Algorithm}
+For two vertices $u,v$ with $y(u) \neq y(v)$, we define the noise terms:
+\begin{align}
+f_+(u,v) &= \sum_{z\in V_+(u,v)} d(z,u), \\
+f_-(v,u) &= \sum_{z\in V_-(v,u)} d(z,v),
+\end{align}
+where $V_+(u,v)$ (respectively $V_-(v,u)$) is the set of positive (respectively negative) labeled vertices in the subtree on the branch from $u$ toward $v$ (respectively from $v$ toward $u$) when the tree is rooted at $u$ (respectively at $v$).
 
-\subsection{Main properties}
+The total noise and loss function are defined as:
+\begin{align}
+f(u,v) &= f_+(u,v) + f_-(v,u), \\
+L_\lambda(u,v) &= f(u,v) - \lambda \cdot d(u,v).
+\end{align}
 
+In this work, we focus on the case $\lambda=1$ and write $L(u,v) = f(u,v) - d(u,v)$. The decision boundary corresponding to a support pair $(s,p)$ is the perpendicular bisector hyperplane of the segment $sp$ in $\mathbb{R}^d$.
 
-We have 
-\begin{proposition}
-    The support vectors will belong to $\Delta$.
-\end{proposition}
+\subsection{Theoretical Properties}
 
+In this subsection, we establish the key theoretical properties of our SVM on tree formulation, focusing on the case $\lambda=1$.
 
-\subsection{Dynamic programming}
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[scale=1.5, thick]
+    % Vertices
+    \node[draw, circle, fill=black, inner sep=2pt, label=above:$P_4$] (P4) at (0,0) {};
+    \node[draw, circle, fill=black, inner sep=2pt, label=above:$s$] (S) at (2,0) {};
+    \node[draw, circle, fill=black, inner sep=2pt, label=above:$P_2$] (P2) at (4,0) {};
+    \node[draw, circle, fill=black, inner sep=2pt, label=above:$P_1$] (P1) at (6,0) {};
+    \node[draw, circle, fill=black, inner sep=2pt, label=below:$P_3$] (P3) at (4,-1.5) {};
 
+    % Edges with labels
+    \draw (P4) -- node[above] {$z$} (S);
+    \draw (S) -- node[above] {$x$} (P2);
+    \draw (P2) -- node[above] {$y$} (P1);
+    \draw (P2) -- (P3);
+  \end{tikzpicture}
+  \caption{Tree structure illustrating nodes $s$, $P_1$, $P_2$, $P_3$, and $P_4$ with edge weights $x$, $y$, and $z$.}
+  \label{fig:tree_nodes}
+\end{figure}
+
+\subsubsection{Notation and Definitions}
+
+For the analysis, we introduce the following notation:
+\begin{align}
+\mathrm{dist}(x,y) &: \text{distance between nodes } x \text{ and } y \text{ in the tree}, \\
+\mathrm{subtree\_cost}(x,y) &: \text{sum of distances from } x \text{ to all descendants} \nonumber \\
+&\quad \text{with the same label as } x, \text{ when rooted at } y.
+\end{align}
+
+For example, referring to Figure~\ref{fig:tree_nodes}:
+\[
+\mathrm{subtree\_cost}(P_2,P_1) = \mathrm{dist}(P_4,P_2) + \mathrm{dist}(P_3,P_2).
+\]
+
+\subsubsection{Adjacency Property}
+
+We now establish a fundamental property that significantly reduces the search space for optimal support pairs.
+
+\begin{theorem}[Adjacency Property]
+\label{thm:adjacency}
+For $\lambda = 1$, the optimal support pair $(s^*,p^*)$ consists of two adjacent vertices on the spine.
+\end{theorem}
+
+\begin{proof}
+Consider two candidate support pairs: $(s,P_1)$ and $(s,P_2)$ where $P_1$ and $P_2$ are consecutive spine vertices as shown in Figure~\ref{fig:tree_nodes}.
+
+From the tree structure, we can express:
+\begin{align}
+f(s,P_1) &= \mathrm{subtree\_cost}(P_2,P_1) + n'(P_1,s) \cdot y, 
+f(s,P_2) &= \mathrm{subtree\_cost}(P_2,P_1) - \mathrm{dist}(P_2,P_3),
+\end{align}
+where $n'(P_1,s)$ represents the number of vertices with the same label as $P_1$ in the relevant subtree.
+
+Therefore:
+\[
+f(s,P_1) = f(s,P_2) + n'(P_1,s) \cdot y + \mathrm{dist}(P_2,P_3).
+\]
+
+Since $\mathrm{dist}(s,P_1) = \mathrm{dist}(s,P_2) + y$, the loss functions are:
+\begin{align}
+L(s,P_1) &= f(s,P_1) - \mathrm{dist}(s,P_1), 
+L(s,P_2) &= f(s,P_2) - \mathrm{dist}(s,P_2).
+\end{align}
+
+Substituting the expressions:
+\[
+L(s,P_1) = L(s,P_2) + n'(P_1,s) \cdot y + \mathrm{dist}(P_2,P_3) - y.
+\]
+
+Since $n'(P_1,s) \cdot y \geq 0$, $\mathrm{dist}(P_2,P_3) \geq 0$, and typically $n'(P_1,s) \geq 1$, we have:
+\[
+L(s,P_1) \geq L(s,P_2).
+\]
+
+This implies that among non-adjacent pairs, there always exists an adjacent pair with better or equal loss, establishing the adjacency property.
+\end{proof}
+
+\subsection{Detailed derivation of $f(s,p_1)$ and $f(s,p_2)$}
+
+From the construction of the tree we recall that:
+\begin{itemize}
+    \item $dis(x,y)$ denotes the distance between two nodes $x$ and $y$.
+    \item $tol(x,y)$ denotes the sum of distances from $x$ to all descendant nodes with the same label as $x$, when the tree is rooted at $y$.
+\end{itemize}
+
+\paragraph{Computation of $f(s,p_1)$.}
+Consider the path from $s$ to $p_1$. By definition,
+\[
+f(s,p_1) = tol(p_2,p_1) + n'(p_1,s)\cdot y,
+\]
+where the second term counts the contribution of the descendants along the branch from $p_1$ back to $s$.
+
+\paragraph{Computation of $f(s,p_2)$.}
+Similarly, consider the path from $s$ to $p_2$. We obtain
+\[
+f(s,p_2) = tol(p_4,p_1) + n'(p_2,s)\cdot (x+z).
+\]
+Since the contribution of $p_3$ must be subtracted, this simplifies to
+\[
+f(s,p_2) = tol(p_2,p_1) - dis(p_2,p_3).
+\]
+
+\paragraph{Relation between $f(s,p_1)$ and $f(s,p_2)$.}
+Combining the above,
+\[
+f(s,p_1) = f(s,p_2) + n'(p_1,s)\cdot y + dis(p_2,p_3).
+\]
+
+Thus, the loss terms $L(s,p_1)$ and $L(s,p_2)$ can later be compared directly by expanding with these expressions.
+
+We have
+\begin{align}
+f(s,p_1) &= tol(p_2,p_1) + n'(p_1,s)\cdot y, \\
+f(s,p_2) &= tol(p_4,p_1) + n'(p_2,s)\cdot (x+z) \\
+         &= tol(p_2,p_1) - dis(p_2,p_3).
+\end{align}
+
+Hence,
+\[
+f(s,P_1) = f(s,P_2) + n'(P_1,s)\cdot y + dis(P_2,P_3).
+\]
+
+Also,
+\[
+dis(s,P_1) = dis(s,P_2) + y.
+\]
+
+Therefore,
+\begin{align}
+L_1 &= L(s,P_1) = f(s,P_1) - dis(s,P_1), \\
+L_2 &= L(s,P_2) = f(s,P_2) - dis(s,P_2).
+\end{align}
+
+Substituting gives
+\begin{align}
+L_1 &= f(s,P_2) - dis(s,P_2) + n'(P_1,s)\cdot y + dis(P_2,P_3) + y, \\
+L_2 &= f(s,P_2) - dis(s,P_2).
+\end{align}
+
+Thus,
+\[
+L_1 = L_2 + n'(P_1,s)\cdot y + dis(P_2,P_3) + y.
+\]
+
+Since $n'(P_1,s)\cdot y \ge 0$, $dis(P_2,P_3) \ge 0$, and $y > 0$, it follows that
+\[
+L_1 > L_2.
+\]
+
+\paragraph{Conclusion.}  
+The optimal support pair $(s,p)$ must consist of two \emph{adjacent} vertices on the spine.
+
+\subsection{Algorithm and Computational Complexity}
+
+\subsubsection{Dynamic Programming for Objective Evaluation}
+
+To efficiently compute $f(u,v)$ for any pair $(u,v)$, we employ a dynamic programming approach using two depth-first search (DFS) passes along the branch $u \to v$:
+
+\begin{enumerate}
+\item \textbf{Size computation pass}: Root the tree $T$ at vertex $u$ and compute, for every node $a$, the subtree sizes:
+\begin{align}
+\mathrm{sz}_+(a) &= |\{z \in \text{subtree}(a) : y(z) = +1\}|, \\
+\mathrm{sz}_-(a) &= |\{z \in \text{subtree}(a) : y(z) = -1\}|.
+\end{align}
+
+\item \textbf{Distance accumulation pass}: Still with the tree rooted at $u$, accumulate the weighted distances:
+\begin{align}
+\mathrm{dist}_+(a) &= \sum_{\substack{z \in \text{subtree}(a)\\ y(z) = +1}} d(z,a), \\
+\mathrm{dist}_-(a) &= \sum_{\substack{z \in \text{subtree}(a)\\ y(z) = -1}} d(z,a).
+\end{align}
+
+These values are then combined along the unique path $u \to v$ to obtain $f_+(u,v)$. By symmetry, rooting the tree at $v$ yields $f_-(v,u)$.
+\end{enumerate}
+
+Since our augmented tree has a spine-and-spoke structure (essentially a path with leaves), all tree traversals can be performed in linear time.
+
+\subsubsection{Complete Algorithm}
+
+% \begin{algorithm}[htbp]
+% \caption{SVM on Tree Algorithm}
+% \label{alg:svm_tree}
+% \begin{algorithmic}[1]
+% \State \textbf{Input:} Labeled dataset $\{(x_i,y_i)\}_{i=1}^n \subset \mathbb{R}^d \times \{-1,+1\}$
+% \State \textbf{Output:} Optimal support pair $(s^*,p^*)$ and decision boundary
+
+% \State Compute class means $\mu_-$, $\mu_+$ and spine direction $w$
+% \State Project all points: $x_i' = \mu_- + \langle x_i-\mu_-, w\rangle w$ for $i = 1,\ldots,n$
+% \State Sort projections $\{x_i'\}$ by coordinate $t_i = \langle x_i-\mu_-, w\rangle$
+% \State Construct augmented tree $T$ with spoke and spine edges
+% \State Initialize $L_{\min} = \infty$, $(s^*,p^*) = \emptyset$
+
+% \For{each pair of adjacent spine vertices $(s,p)$ with $y(s) \neq y(p)$}
+%     \State Compute $f(s,p)$ using two DFS passes
+%     \State Calculate $L(s,p) = f(s,p) - d(s,p)$
+%     \If{$L(s,p) < L_{\min}$}
+%         \State $L_{\min} = L(s,p)$
+%         \State $(s^*,p^*) = (s,p)$
+%     \EndIf
+% \EndFor
+
+% \State \textbf{return} $(s^*,p^*)$ and perpendicular bisector of segment $s^*p^*$
+% \end{algorithmic}
+% \end{algorithm}
+
+\subsubsection{Complexity Analysis}
+
+The computational complexity of our algorithm is analyzed as follows:
+
+\begin{itemize}
+\item \textbf{Projection step}: Computing projections for $n$ points in $\mathbb{R}^d$ requires $O(nd)$ operations.
+\item \textbf{Sorting step}: Sorting $n$ projections by their coordinates takes $O(n \log n)$ time.
+\item \textbf{Tree construction}: Building the augmented tree with $n$ spoke edges and $O(n)$ spine edges requires $O(n)$ time.
+\item \textbf{Objective evaluation}: Each DFS pass takes $O(n)$ time, and there are $O(n)$ adjacent pairs to evaluate due to Theorem~\ref{thm:adjacency}.
+\end{itemize}
+
+\begin{theorem}[Complexity]
+The overall time complexity of Algorithm~\ref{alg:svm_tree} is $O(nd + n \log n)$, or $O(n \log n)$ for fixed dimension $d$.
+\end{theorem}
+
+This represents a significant improvement over exhaustive search, which would require $O(n^2)$ pair evaluations, each taking $O(n)$ time for objective computation.
+
+\subsubsection{Optimization Problem Statement}
+
+The core optimization problem solved by our algorithm is:
+
+% \begin{problem}[SVM on Tree]
+Given the augmented tree $T$ and loss function $L(\cdot,\cdot)$, find:
+\[
+(s^*,p^*) = \arg\min_{(s,p): y(s) \neq y(p)} L(s,p) = \arg\min_{(s,p): y(s) \neq y(p)} [f(s,p) - d(s,p)].
+\]
+% \end{problem}
+
+By Theorem~\ref{thm:adjacency}, this optimization reduces to considering only adjacent opposite-label projection pairs on the spine, dramatically reducing the search space from $O(n^2)$ to $O(n)$ candidates.
