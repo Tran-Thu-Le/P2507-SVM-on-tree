@@ -147,19 +147,14 @@
 %       comments of authors
 % ----------------------------
 % REMARK
+\usepackage{ulem} % for strikethrough command \sout{}
 \newcommand{\remLE}[1]{\textcolor{blue}{\small [LE: #1]}}
-\newcommand{\remNGAN}[1]{\textcolor{violet}{\small [NGAN: #1]}}
-\newcommand{\remDUY}[1]{\textcolor{orange}{\small [DUY: #1]}}
-\newcommand{\remTRANG}[1]{\textcolor{green}{\small [TRANG: #1]}}
-\newcommand{\remTUNG}[1]{\textcolor{red}{\small [TUNG: #1]}}
+\newcommand{\addLE}[1]{\textcolor{blue}{[LE: #1]}}
+\newcommand{\delLE}[1]{\textcolor{blue}{\small [LE: \sout{#1}]}}
 
 
-
-
-
-% ADD CONTENTS
-\newcommand{\addLE}[1]{\textcolor{blue}{\small [LE: #1]}}
-\newcommand{\addTUNG}[1]{\textcolor{red}{\small [TUNG: #1]}}
+\newcommand{\remHUAN}[1]{\textcolor{red}{\small [TUNG: #1]}}
+\newcommand{\addHUAN}[1]{\textcolor{red}{\small [TUNG: #1]}}
 
 % Theorem environments
 % \newtheorem{theorem}{Theorem}
