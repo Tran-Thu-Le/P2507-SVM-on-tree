@@ -90,116 +90,90 @@ In this subsection, we establish the key theoretical properties of our SVM on tr
   \label{fig:tree_nodes}
 \end{figure}
 
-\subsubsection{Notation and Definitions}
-
-For the analysis, we introduce the following notation:
-\begin{align}
-d(x,y) &: \text{distance between nodes } x \text{ and } y \text{ in the tree}, \\
-\mathrm{subtree\_cost}(x,y) &: \text{sum of distances from } x \text{ to all descendants} \nonumber \\
-&\quad \text{with the same label as } x, \text{ when rooted at } y.
-\end{align}
-
-For example, referring to Figure~\ref{fig:tree_nodes}:
-\[
-\mathrm{subtree\_cost}(p_2,p_1) = d(p_4,p_2) + d(p_3,p_2).
-\]
 
 \subsubsection{Adjacency Property}
 
 We now establish a fundamental property that significantly reduces the search space for optimal support pairs.
 
-\begin{theorem}[Adjacency Property]
-\label{thm:adjacency}
-For $\lambda = 1$, the optimal support pair $(s^*,p^*)$ consists of two adjacent vertices on the spine.
-\end{theorem}
 
-\begin{proof}
-Consider two candidate support pairs: $(s,p_1)$ and $(s,p_2)$ where $p_1$ and $p_2$ are consecutive spine vertices as shown in Figure~\ref{fig:tree_nodes}.
-
-From the tree structure, we can express:
-\begin{align}
-f(s,p_1) &= \mathrm{subtree\_cost}(p_2,p_1) + n'(p_1,s) \cdot y, \\
-f(s,p_2) &= \mathrm{subtree\_cost}(p_2,p_1) - d(p_2,p_3),
-\end{align}
-where $n'(p_1,s)$ represents the number of vertices with the same label as $p_1$ in the relevant subtree.
-
-Therefore:
-\[
-f(s,p_1) = f(s,p_2) + n'(p_1,s) \cdot y + d(p_2,p_3).
-\]
-
-Since $d(s,p_1) = d(s,p_2) + y$, the loss functions are:
-\begin{align}
-L(s,p_1) &= f(s,p_1) - d(s,p_1), \\
-L(s,p_2) &= f(s,p_2) - d(s,p_2).
-\end{align}
-
-Substituting the expressions:
-\[
-L(s,p_1) = L(s,p_2) + n'(p_1,s) \cdot y + d(p_2,p_3) - y.
-\]
-
-Since $n'(p_1,s) \cdot y \geq 0$, $d(p_2,p_3) \geq 0$, and typically $n'(p_1,s) \geq 1$, we have:
-\[
-L(s,p_1) \geq L(s,p_2).
-\]
-
-This implies that among non-adjacent pairs, there always exists an adjacent pair with better or equal loss, establishing the adjacency property.
-\end{proof}
-
-\subsection{Detailed derivation of {$f(s,p1)$ and $f(s,p2)$}}
-
-Define $tol(x,y)$ as the sum of distances from $x$ to all descendant nodes with the same label as $x$, when the tree is rooted at $y$.
-
-We assume without loss of generality that $s \in V_+$ and $p_1, p_2\in V_-$ and $p_2$ is in the path connecting $s$ and $p_1$, \ie $d(s, p_1) = d(s, p_2) + d(p_2, p_1)$. 
-
-Recall the definition of total noise, see XXX, we have 
-\begin{align*}
-    f(s, p_1) & = f_+(s, p_1) + f_-(p_1, s)\\ 
-    f(s, p_2) & = f_+(s, p_2) + f_-(p_2, s).
-\end{align*}
-Since $f_+(s, p_1) = f_+(s, p_2)$, \remLE{Why? Explain.}, then 
-\begin{equation*}
-    f(s, p_1) - f(s, p_1) = f_-(p_1, s) - f_-(p_2, s).
-\end{equation*}
-
-Recall the definition of negative noise, we have
-\begin{equation*}
-    f_-(p_1, s) = \sum_{v\in V_-(p_1, s)} d(v, p_1)
-\end{equation*}
-
-
-Define the vertex set 
+Let $s \in V_+$ and $p_1, p_2\in V_-$ and $p_2$ is in the path connecting $s$ and $p_1$, \ie
+\begin{equation}
+    d(s, p_1) = d(s, p_2) + d(p_2, p_1)
+    \label{eq:distance-decomposition}
+\end{equation}
+Define the residual of vertex set 
 \begin{equation*}
     R = V_-(p_1, s) \setminus V_-(p_2, s).
 \end{equation*}
-Then 
-\begin{align*}
-    f_-(p_1, s)
-    & = \sum_{v\in V_-(p_1, s)} d(v, p_1)\\
-    & = \sum_{v\in V_-(p_2, s)} d(v, p_1) + \sum_{v\in R} d(v, p_1)\\
-    & = \sum_{v\in V_-(p_2, s)} [d(v, p_2) + d(p_2, p_1)] + \sum_{v\in R} d(v, p_1)\\
-    & = f_-(p_2, s) + d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1)
-\end{align*}
-or 
-\begin{equation*}
-    f_-(p_1, s) - f_-(p_2, s) = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1).
+The following result establish the difference between the two noise functions.
+\begin{lemma}
+    We have 
+    \begin{equation*}
+    f(s, p_1) - f(s, p_2) = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1).
 \end{equation*}
+\end{lemma}
+\begin{proof}
+    Recall the definition of total noise, see XXX, we have 
+    \begin{align*}
+        f(s, p_1) & = f_+(s, p_1) + f_-(p_1, s)\\ 
+        f(s, p_2) & = f_+(s, p_2) + f_-(p_2, s).
+    \end{align*}
+    Since $f_+(s, p_1) = f_+(s, p_2)$, \remLE{Why? Explain.}, then 
+    \begin{equation*}
+        f(s, p_1) - f(s, p_1) = f_-(p_1, s) - f_-(p_2, s).
+    \end{equation*}
 
-Now, we have 
-\begin{align*}
-    L_1(s, p_1) - L_1(s, p_2) 
-    & = f(s, p_1) - f(s, p_2) - (d(s, p_1) -d(s, p_2))\\
-    & = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1) - d(p_2, p_1)\\
-    & = d(p_2, p_1) (|V_-(p_2,s)| - 1) + \sum_{v\in R} d(v, p_1).
-\end{align*}
-Since $V_-(p_2,s)$ contains at least a vertex (say $p_1$), we should have $|V_-(p_2,s)| - 1 \geq 0$. Thus, we obtain the nonnegativity. Therefore, 
-\begin{equation*}
-    L_1(s, p_1) \geq L_1(s, p_2).
-\end{equation*}
+    Recall the definition of negative noise, we have
+    \begin{equation*}
+        f_-(p_1, s) = \sum_{v\in V_-(p_1, s)} d(v, p_1)
+    \end{equation*}
 
- 
-The optimal support pair $(s,p)$ must consist of two adjacent vertices on the spine \remLE{prove that "on spine" not "on spoke".}
+
+
+    Then 
+    \begin{align*}
+        f_-(p_1, s)
+        & = \sum_{v\in V_-(p_1, s)} d(v, p_1)\\
+        & = \sum_{v\in V_-(p_2, s)} d(v, p_1) + \sum_{v\in R} d(v, p_1)\\
+        & = \sum_{v\in V_-(p_2, s)} [d(v, p_2) + d(p_2, p_1)] + \sum_{v\in R} d(v, p_1)\\
+        & = f_-(p_2, s) + d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1)
+    \end{align*}
+    or 
+    \begin{equation*}
+        f_-(p_1, s) - f_-(p_2, s) = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1).
+    \end{equation*}
+
+    
+\end{proof}
+
+
+\begin{theorem}[Adjacency Property]
+\label{thm:adjacency}
+For $\lambda = 1$, there exists an optimal support pair $(s^*,p^*)$ consisting of two adjacent vertices on the spine.
+\end{theorem}
+
+\begin{proof}
+    We prove by constradiction.
+    Let $s \in V_+$ and $p_1 \in V_-$ and $(s, p_1)$ is optimal but not adjacent, \ie there exists $p_2 \in V_-$ \remLE{why} in the path connecting $s$ and $p_1$. 
+
+
+    Now, we ai to show that $(s, p_2)$ is also optimal but having $p_2$ closer to $s$ in a comparision with $p_1$.
+    To this end, we consider 
+    \begin{align*}
+        L_1(s, p_1) - L_1(s, p_2) 
+        & = f(s, p_1) - f(s, p_2) - (d(s, p_1) -d(s, p_2))\\
+        & = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1) - d(p_2, p_1)\\
+        & = d(p_2, p_1) (|V_-(p_2,s)| - 1) + \sum_{v\in R} d(v, p_1).
+    \end{align*}
+    Since $V_-(p_2,s)$ contains at least a vertex (say $p_1$), we should have $|V_-(p_2,s)| - 1 \geq 0$. Thus, we obtain the nonnegativity. Therefore, 
+    \begin{equation*}
+        L_1(s, p_1) \geq L_1(s, p_2).
+    \end{equation*}
+    Since $(s, p_1)$ is optimal, $(s, p_2)$ is also optimal. This completes the proof.
+
+    Note that, there exists an optimal pair $(s^*, p^*)$ lying on the spine. Otherwise, assume that $p^*$ not on the spine, \ie it is the original point, let $p'$ be its projection, then it is clear that $p'$ has the same sign as $p^*$ while closer to $s$. Thus $(s^*, p')$ is also optimal with $p'$ on spine. If $s^*$ is not on the spline, we repeat the same argument. We complete the proof.
+\end{proof}
+
 
 \subsection{Algorithm and Computational Complexity}
 
