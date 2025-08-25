@@ -1,0 +1,43 @@
+\section{Classical models of SVM}
+\subsection{SVM model}
+% \remLE{Khanh Duy do this}
+
+In this section, we will revisit how the SVM model with soft-margin has been constructed. This will lay the foundation for constructing the SVM model on tree. 
+
+
+We are given the training data $(x_i, y_i) \in \RR^n \times \{-1, 1\}$ for $i=1,..., m$. Here each $x_i$ is a feature and $y_i$ is the corresponding label with two class $+1$ and $-1$. The goal here is to constructing a hyperplane, say $x^T w = 0$ that separate the training points.
+
+We find $w$ by minimizing the following two objectives 
+\begin{enumerate}
+    \item the loss function 
+    \item the margin 
+\end{enumerate}
+
+Problem fomulation 
+\begin{equation*}
+    \min_{w} \quad 
+    \sum_{i=1}^m \max(1- y_i x_i^T w, 0) + \frac{\lambda}{2}\norm{w}_2^2
+\end{equation*}
+
+\begin{remark}
+    \remLE{add remark explaining why we consider so simple model of SVM 1) why we do not use bias term 2) why we do not use kernel. Because these general model can be translated into our simple model.}
+\end{remark}
+
+\subsection{SVM in 1D}
+\remLE{Khanh Duy do this}
+
+In the 1D model of SVM \remLE{find the proper name used in the literature}, for each line $\Delta$, we project the points $x_i$ onto $\Delta$, then solve the 1D SVM \wrt $\Delta$. We the varying $\Delta$, and choose the line with smallest objective. 
+
+Solving 1D SVM is equivalent to finding optimal pair of support vectors. 
+
+Given a training data $(x_i, y_i) \in \RR^n \times \{-1, 1\}$ for $i=1,..., m$. We now construct a simple tree to approximate the training data.
+The idea is simple, we first find the center of positive group, say $c^+$ and center of negative group, say $c^-$. Let $\Delta$ be the line passsing through the two centers. We then porject $x_i$ onto $\Delta$, and obtain $\hat{x}_i$. So the set of $\hat{x}_i$ form a path graph. We further add edges $(x_i, \hat{x}_i)$ to the graph. The resulting graph form a tree. 
+
+In this tree, we have $V = \{x_i: i =1,..., m\} \cup \{\hat{x}_i: i=1,..., m\}$. 
+We assign label $y_i$ for $\hat{x}_i$ for all $i=1,..., m$.
+
+
+\subsection{Reformulation of classical SVM in terms of support vectors}
+\remLE{Le do this}
+
+

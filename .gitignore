@@ -28,3 +28,7 @@ dist/
 # CMake / scikit-build
 _CMake_build/
 *.cache/
+
+# latex
+latex/.aux/*
+*.latexmkrc

@@ -1,0 +1,114 @@
+\section{SVM on tree}
+\remLE{Huan do this}
+
+In this section, we aim to develop an efficient algorithm for solving SVM model in linear by projecting the training points onto a tree. 
+
+
+\subsection{Projection onto tree}
+
+Given a training data $(x_i, y_i) \in \RR^n \times \{-1, 1\}$ for $i=1,..., m$. We now construct a simple tree to approximate the training data.
+The idea is simple, we first find the center of positive group, say $c^+$ and center of negative group, say $c^-$. Let $\Delta$ be the line passsing through the two centers. We then porject $x_i$ onto $\Delta$, and obtain $\hat{x}_i$. So the set of $\hat{x}_i$ form a path graph. We further add edges $e_i = (x_i, \hat{x}_i)$ to the graph. The resulting graph form a tree. So, In this tree, we have
+\begin{align*}
+    V & = \{x_i: i =1,..., m\} \cup \{\hat{x}_i: i=1,..., m\},\\
+    E & = \{e_i: i =1,..., m\} \cup \{\hat{e}_i: i=2,..., m\}.\\
+\end{align*}
+We now specify the label of vertices and edge lengths. We set $L(x_i) = L(\hat{x}_i) = y_i$ for all $i=1,..., m$ and for the edge length we have two options to define $ell(e_i)$
+\begin{equation*}
+    \ell(e_i) = \|x_i - \hat{x}_i\|_2.
+\end{equation*}
+and 
+\begin{equation*}
+    \ell(e_i) = 0.
+\end{equation*}
+The latter setting shows that the model is actually a generalization for 1D SVM. Specifically, if we set $ell(e_i)=0$ for 
+
+$V = \{x_i: i =1,..., m\} \cup \{\hat{x}_i: i=1,..., m\}$. 
+We assign label $y_i$ for $\hat{x}_i$ for all $i=1,..., m$.
+Without loss of generality, we may assume that $\hat{x}_i$ will be sorted in a certain order, 
+\begin{equation*}
+    \hat{x}_1 \leq ...\leq \hat{x}_n.
+\end{equation*}
+
+We now detail the computations. The centers $c^+$ and $c^-$ can be copmputed as follows
+\begin{equation*}
+    c^+ = \frac{1}{|I_+|} \sum_{i \in I_+} x_i 
+    \text{ and }
+    c^- = \frac{1}{|I_-|} \sum_{i \in I_-} x_i 
+\end{equation*}
+
+\subsection{SVM problem on tree}
+
+Let $T=(V, E)$ be a tree. Each vertex $v \in V$ has a label denoted by $L(v) \in \{-1, +1\}$. 
+Denote $V_+=\{v \in V: L(v)= +1\}, V_-=\{v \in V: L(v) = -1\}$.
+The SVM on tree aims to find two vertices $u \in V_+$ and $v \in V_-$, say \emph{support nodes}, which stimuate the role of support vector in the classical SVM models.
+
+In this case, we say that $(v_+, v_-)$ form a \emph{support nodes} if it minimizes the following two objectives
+\begin{enumerate}
+    \item The margin $d(v_+, v_-)$
+    \item The noise $f(v_+, v_-)$
+\end{enumerate}
+We now define the noise.
+
+We first define the noisy nodes.
+A vertex $v \in V_+$ is said to be a positive noise \wrt to support nodes $(v_+, v_-)$ if $T(v_+, v_-)$.  We denote the set of positive noises \wrt $(v_+, v_-)$ as $V_+(v_+, v_-)$. Similarly, we define $V_-(v_-, v_+)$ as the set of negative noises \wrt $(v_+, v_-)$.
+Define 
+\begin{align*}
+    N_+ & = \{v \in T(v_+, v_-): L(v) = + 1\} = T(v_+, v_-) \cap V_+\\
+    N_- & = \{v \in T(v_-, v_+): L(v) = - 1\} = T(v_-, v_+) \cap V_-.\\
+\end{align*}
+Recall that $T(u, v)$ is a subtree root at $u$ and containing $v$.
+
+We next define the partial noise.  
+The positive noise is defined as the total distance from $v_+$ to nodes in $N_+$. The negative noise is defined similarly.
+\begin{equation*}
+    f_+(v_+, v_-) = \sum_{x \in N_+} d(x, u)
+    \text{ and }
+    f_-(v_+, v_-) = \sum_{x \in N_-} d(x, v).
+\end{equation*}
+The total noise is then given by
+\begin{equation*}
+    f(v_+, v_-) = f_+(v_+, v_-) + f_-(v_+, v_-).
+\end{equation*}
+
+Problem formulation 
+\begin{equation*}
+    \min_{v_+ \in V_+, v_- in V_-} \quad 
+    f(v_+, v_-) - d(v_+, v_-).
+\end{equation*}
+
+We will use the following notations for SVM model on tree $\tree$
+\begin{enumerate}
+    \item Tree $\tree = (V, E)$ be a tree with vertex set $V=\{x_1, ...., x_m\} \subset \RR^n$ and edge set $E$, an edge $e$ connecting $x_i$ and $x_j$ is denoted by $e=(x_i, x_j)$.
+    \item Training data $(x_i, y_i) \in \RR^n \times \{-1, 1\}$ for $i=1,..., m$
+    \item Denote $V_+=\{x_i \in V: y_i = +1\}, V_-=\{x_i \in V: y_i = -1\}$
+    \item The SVM on tree aims to minimize the objective function 
+    \begin{align*}
+        \min_{u \in V_+, v \in V_-} \quad & P(u, v) = f(u, v) - \lambda d(u, v)
+    \end{align*}
+    where $d(u, v)$ stands for the margin of the model and $f$ is the loss function defined as $f(u, v) = f_+(u, v) + f_-(u, v)$ with
+    \begin{equation*}
+        f_+(u, v) = \sum_{x \in V_+(u, v)} d(x, u)
+        \text{ and }
+        f_-(u, v) = \sum_{x \in V_-(v, u)} d(x, v).
+    \end{equation*}
+    Here, $V_+(u, v)$ is the set of $+1$-labelled vertices of subtree rooted at $u$ containing $v$ and $V_-(v, u)$ is the set of $-1$-labelled vertices of subtree rooted at $v$ containing $u$.
+
+    \item \remLE{How to define separating plan?}
+
+\end{enumerate}
+
+
+
+% \section{Property and Algorithm}
+
+\subsection{Main properties}
+
+
+We have 
+\begin{proposition}
+    The support vectors will belong to $\Delta$.
+\end{proposition}
+
+
+\subsection{Dynamic programming}
+
