@@ -105,8 +105,16 @@ Define the residual of vertex set
 \begin{equation*}
     R = V_-(p_1, s) \setminus V_-(p_2, s).
 \end{equation*}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\linewidth]{../data/images/diff-set.png}
+  \caption{...}
+  \label{fig:diff-set}
+\end{figure}
+
 The following result establish the difference between the two noise functions.
-\begin{lemma}
+\begin{lemma}[Difference between noise functions]
     We have 
     \begin{equation*}
     f(s, p_1) - f(s, p_2) = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1).
@@ -176,6 +184,17 @@ For $\lambda = 1$, there exists an optimal support pair $(s^*,p^*)$ consisting o
 
 
 \subsection{Algorithm and Computational Complexity}
+
+\subsubsection{Preprocessing}
+
+We assume that $x_1,..., x_n$ are sorted in a certain order, \eg by their first coordinate, then by the second one, ... 
+We root the tree at $x_1$ and assume without loss of generality that $x_1 \in V_+$.
+
+
+By Theorem XXX, we know that a pair of suport vector is one of the adjacent pair $(x_i, x_{i+1})$ with different signs. 
+In this case the margin is easily to compute $d(x_i, x_{i+1})= \|x_i - x_{i+1}\|$. To compute to total loss function, it is necessary to compute $f_+(x_i, x_{i+1})$ and $f_-(x_i, x_{i+1})$.
+
+
 
 \subsubsection{Dynamic Programming for Objective Evaluation}
 
