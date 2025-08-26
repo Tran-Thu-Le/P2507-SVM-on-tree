@@ -177,6 +177,62 @@ For $\lambda = 1$, there exists an optimal support pair $(s^*,p^*)$ consisting o
 
 \subsection{Algorithm and Computational Complexity}
 
+\subsubsection{Preprocessing} 
+
+Recall $x'_1, ...,x'_n$ are projections of $x_1,..., x_n$ and we assume that $x'_1, ...,x'_n$ have been sorted in a certain order, \eg by their first coordinates. By theorem XXX, we know that support vectors is a pair $(x'_i, x'_{i+1})$ with opposite signs. The margin is clearly $d(x'_i, x'_{i+1}) = \|x'_i - x'_{i+1}\|_2$.
+To compute the total loss, we only need $f(x'_i, x'_{i+1})$ for $i=1,.., n-1$. In the following, we will clarify how to compute these values efficiently using dynamic programming.
+
+
+For $i = 1, ...., n-1$, we define 
+\begin{align*}
+    N^{>i}_+  & = |\{v \in V_+(x'_i, x'_{i+1})\}| = 2 |\{j > i: y_j=+1\}|\\
+    N^{>i}_-  & = |\{v \in V_-(x'_i, x'_{i+1})\}| = 2 |\{j > i: y_j=-1\}|\\
+    N^{\leq i}_+  & = |\{v \in V_+(x'_{i+1}, x'_{i})\}| = 2 |\{j \leq  i: y_j=+1\}|\\
+    N^{\leq i}_-  & = |\{v \in V_+(x'_{i+1}, x'_{i})\}| = 2 |\{j \leq  i: y_j=-1\}|
+\end{align*}
+and
+\begin{align*}
+    d^{>i}_+  & = \sum_{v \in V_+(x'_i, x'_{i+1})} d(x'_i, v)
+    & = \sum_{j > i, y_j = +1 }[d(x'_i, x'_j) + d(x'_i, x_j)],\\
+    d^{>i}_-  & = \sum_{v \in V_-(x'_i, x'_{i+1})} d(x'_i, v)
+    & = \sum_{j > i, y_j = -1 }[d(x'_i, x'_j) + d(x'_i, x_j)],\\
+    d^{\leq i}_+  & = \sum_{v \in V_+(x'_{i+1}, x'_{i})} d(v, x'_{i+1})
+    & = \sum_{j \leq i, y_j = +1 }[d(x'_j, x'_{i+1}) + d(x_j, x'_{i+1})]\\
+    d^{\leq i}_-  & = \sum_{v \in V_-(x'_{i+1}, x'_{i})} d(v, x'_{i+1})
+    & = \sum_{j \leq i, y_j = -1 }[d(x'_j, x'_{i+1}) + d(x_j, x'_{i+1})].
+\end{align*}
+
+Consider $i = 1, ...., n-1$. If $y_i = -1$ and $y_{i+1}=+1$, we then have 
+\begin{equation*}
+    f(x'_i, x'_{i+1}) = d^{>i}_- + d^{\leq i}_+.
+\end{equation*}
+Else, that is $y_i = +1$ and $y_{i+1}=-1$, then 
+\begin{equation*}
+    f(x'_i, x'_{i+1}) = d^{>i}_+ + d^{\leq i}_-.
+\end{equation*}
+
+\begin{proposition}
+    For $i=1,..., n-1$, if we have $N^{\leq i}_-$ and $d^{\leq i}_-$, then we can update $N^{\leq i+1}_-$ and $d^{\leq i+1}_-$.
+\end{proposition}
+\begin{proof}
+    \remLE{Em giup anh chung minh cho nay nha}
+\end{proof}
+
+By above proposition, we have
+\begin{proposition}
+    We can compute the following quantities in $O(n)$.
+    \begin{enumerate}
+        \item $(N^{>i}_+, N^{>i}_-, N^{\leq i}_+, N^{\leq i}_-)$ for all $i=1,..., n-1$
+        \item $(d^{>i}_+, d^{>i}_-, d^{\leq i}_+, d^{\leq i}_-)$ for all $i=1,..., n-1$
+        \item $f(x'_i, x'_{i+1})$ for all $i=1,..., n-1$.
+    \end{enumerate}
+\end{proposition}
+\begin{proof}
+    \remLE{Em giup anh chung minh cho nay nha. Chu y, su dung menh de phia tren.}
+\end{proof}
+
+
+
 \subsubsection{Dynamic Programming for Objective Evaluation}
 
 To efficiently compute $f(u,v)$ for any pair $(u,v)$, we employ a dynamic programming approach using two depth-first search (DFS) passes along the branch $u \to v$:
