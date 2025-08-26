@@ -60,7 +60,7 @@ Since we aim to minimize the noise while maximizing the margin, the total loss f
 \begin{equation*}
     L_\lambda(u,v) = f(u,v) - \lambda \cdot d(u,v).
 \end{equation*}
-where $lambda \geq 0$ is a parameter which controls the balance between the noise and the margin.
+where $\lambda \geq 0$ is a parameter which controls the balance between the noise and the margin.
 }
 
 
@@ -120,7 +120,7 @@ The following result establish the difference between the two noise functions.
     \end{align*}
     Since $f_+(s, p_1) = f_+(s, p_2)$, \remLE{Why? Explain.}, then 
     \begin{equation*}
-        f(s, p_1) - f(s, p_1) = f_-(p_1, s) - f_-(p_2, s).
+        f(s, p_1) - f(s, p_2) = f_-(p_1, s) - f_-(p_2, s).
     \end{equation*}
 
     Recall the definition of negative noise, we have
@@ -153,11 +153,11 @@ For $\lambda = 1$, there exists an optimal support pair $(s^*,p^*)$ consisting o
 \end{theorem}
 
 \begin{proof}
-    We prove by constradiction.
+    We prove by contradiction.
     Let $s \in V_+$ and $p_1 \in V_-$ and $(s, p_1)$ is optimal but not adjacent, \ie there exists $p_2 \in V_-$ \remLE{why} in the path connecting $s$ and $p_1$. 
 
 
-    Now, we ai to show that $(s, p_2)$ is also optimal but having $p_2$ closer to $s$ in a comparision with $p_1$.
+    Now, we aim to show that $(s, p_2)$ is also optimal but having $p_2$ closer to $s$ in a comparison with $p_1$.
     To this end, we consider 
     \begin{align*}
         L_1(s, p_1) - L_1(s, p_2) 
@@ -171,7 +171,7 @@ For $\lambda = 1$, there exists an optimal support pair $(s^*,p^*)$ consisting o
     \end{equation*}
     Since $(s, p_1)$ is optimal, $(s, p_2)$ is also optimal. This completes the proof.
 
-    Note that, there exists an optimal pair $(s^*, p^*)$ lying on the spine. Otherwise, assume that $p^*$ not on the spine, \ie it is the original point, let $p'$ be its projection, then it is clear that $p'$ has the same sign as $p^*$ while closer to $s$. Thus $(s^*, p')$ is also optimal with $p'$ on spine. If $s^*$ is not on the spline, we repeat the same argument. We complete the proof.
+    Note that, there exists an optimal pair $(s^*, p^*)$ lying on the spine. Otherwise, assume that $p^*$ not on the spine, \ie it is the original point, let $p'$ be its projection, then it is clear that $p'$ has the same sign as $p^*$ while closer to $s$. Thus $(s^*, p')$ is also optimal with $p'$ on spine. If $s^*$ is not on the spine, we repeat the same argument. We complete the proof.
 \end{proof}
 
 
