@@ -2,45 +2,53 @@
 \label{sec:svm_on_tree}
 \label{sec:svm_tree}
 
-In this section, we present a novel approach to binary classification using Support Vector Machines (SVM) on tree structures. Our method constructs an augmented tree from the data and formulates the classification problem as an optimization over support pairs on this tree.
+In this section, we present a novel approach to binary classification using SVM on tree structures. We first construct an augmented labeled tree from the training data. Second, we formulate a SVM model on tree. Third, we study the theoretial property of the model. Finally, we leverage the established property to propose combinatorial methods solving the problem efficiently.
 
-\subsection{Problem Formulation}
+\subsection{Tree-based approximation}
+\label{sec:tree-based-approximation}
+Given a training dataset $\{(x_i,y_i)\in \mathbb{R}^d \times \{-1,+1\}: i=1,..., n\}$, we describe a procedure for constructing a tree that approximates the dataset. Let $\Delta$ be a line in $\mathbb{R}^d$. In this work, we focus on the line $\Delta$ connecting the two class means. For each $i=1,\ldots,n$, let $x'_i$ denote the orthogonal projection of $x_i$ onto $\Delta$. The tree is then built with vertices consisting of both the original points $x_i$ and their projections $x'_i$. Its edge set includes (i) spline edges, which are the line segments connecting consecutive projection points along $\Delta$, and (ii) spoke edges, which are the line segments connecting each original point $x_i$ to its projection $x'_i$. The details of this construction are described below.
 
-\subsubsection{Data Representation and Spine Construction}
 
-Given a labeled dataset $\{(x_i,y_i)\}_{i=1}^n \subset \mathbb{R}^d \times \{-1,+1\}$, we define the class means as:
-\begin{align}
+Let $V_- = \{x_i : y_i = -1\}$ and $V_+ = \{x_i : y_i = +1\}$.
+The class means is:
+\begin{align*}
 \mu_- &= \frac{1}{|V_-|}\sum_{y_i=-1} x_i, \\
-\mu_+ &= \frac{1}{|V_+|}\sum_{y_i=+1} x_i,
-\end{align}
-where $V_- = \{i : y_i = -1\}$ and $V_+ = \{i : y_i = +1\}$.
+\mu_+ &= \frac{1}{|V_+|}\sum_{y_i=+1} x_i.
+\end{align*}
 
-The unit spine direction is computed as:
-\[
-w = \frac{\mu_+ - \mu_-}{\|\mu_+ - \mu_-\|}.
-\]
+The unit vector pointing the direction of the line $\Delta$ conencting the two means is
+\begin{equation*}
+    w = \frac{\mu_+ - \mu_-}{\|\mu_+ - \mu_-\|_2}.
+\end{equation*}
 
-For each data point $x_i$, we compute its projection onto the line passing through $\mu_-$ in direction $w$:
-\begin{align}
-x_i' &= \mu_- + \langle x_i-\mu_-,\, w\rangle\, w, \\
+For each data point $x_i$, we compute its projection onto the line passing through $\mu_-$ in direction $w$
+\begin{align*}
+x_i' &= \mu_- + t_i w, \\
 t_i &= \langle x_i-\mu_-,\, w\rangle.
-\end{align}
+\end{align*}
 
-The projected points $\{x_i'\}$ are then sorted by their projection coordinates $t_i$.
+The projected points $\{x_i'\}$ are then sorted by their projection coordinates $t_i$. Without loss of generality, we may assume that 
+\begin{equation*}
+    t_1 \leq ...\leq t_n.
+\end{equation*}
 
-\subsubsection{Augmented Tree Construction}
 
-We construct an augmented tree $T=(V,E)$ with two types of edges:
-\begin{enumerate}
-\item \textbf{Spoke edges}: Connect each original point $x_i$ to its projection $x_i'$, weighted by the Euclidean distance $\|x_i-x_i'\|$.
-\item \textbf{Spine edges}: Connect consecutive projections in the sorted order, weighted by their Euclidean distance in $\mathbb{R}^d$.
-\end{enumerate}
+We construct an augmented tree $T=(V,E)$ with vertex set
+\begin{equation*}
+V = {x_1, ...., x_n} \cup {x'_1,..., x'_n},
+\end{equation*}
+and edge set
+\begin{equation*}
+E = {(x'i, x'{i+1}): i=1,..., n-1} \cup {(x_i, x'_i): i=1,..., n}.
+\end{equation*}
+We refer to edges connecting two adjacent projection points as \emph{spine edges}, and to edges connecting each original point with its projection as \emph{spoke edges}. The path formed by the sequence of all spine edges is called the \emph{spine} of the tree.
 
-For any vertices $u,v \in V$, let $d(u,v)$ denote the shortest path distance (sum of edge weights) between $u$ and $v$ in $T$.
+The tree $T$ is endowed with vertex labels and edge lengths as follows. Each $x_i$ and $x'_i$ inherits the original label $y_i$ for all $i=1,..., n$. Each edge is assigned a length equal to the Euclidean distance between its endpoints. For any vertices $u,v \in V$, let $d(u,v)$ denote the distance between $u$ and $v$, defined as the total length of edges along the (unique) path connecting them.
 
-\subsubsection{Objective Function}
+\subsection{SVM model on tree}
 
-For two vertices $u,v$ with $y(u) \neq y(v)$, we define the noise terms:
+Let $T$ be a tree constructed in \Cref{sec:tree-based-approximation}.
+For two vertices $u,v$ in $T$ with different labels, we define the noise terms:
 \begin{align}
 f_+(u,v) &= \sum_{z\in V_+(u,v)} d(z,u), \\
 f_-(v,u) &= \sum_{z\in V_-(v,u)} d(z,v),
@@ -66,7 +74,9 @@ where $\lambda \geq 0$ is a parameter which controls the balance between the noi
 
 In this work, we focus on the case $\lambda=1$ and write $L(u,v) = f(u,v) - d(u,v)$. The decision boundary corresponding to a support pair $(s,p)$ is the perpendicular bisector hyperplane of the segment $sp$ in $\mathbb{R}^d$.
 
-\subsection{Theoretical Properties}
+% \subsection{Theoretical Properties}
+\subsection{Adjacency property for unit parameter}
+
 
 In this subsection, we establish the key theoretical properties of our SVM on tree formulation, focusing on the case $\lambda=1$.
 
@@ -91,7 +101,6 @@ In this subsection, we establish the key theoretical properties of our SVM on tr
 \end{figure}
 
 
-\subsubsection{Adjacency Property}
 
 We now establish a fundamental property that significantly reduces the search space for optimal support pairs.
 
@@ -261,7 +270,6 @@ By above proposition, we have
     \end{enumerate}
 \end{proposition}
 \begin{proof}
-\begin{proof}
     We prove this by applying the previous proposition in a systematic manner, using the dynamic programming technique on trees (Proposition 5.3).
 
     \textbf{Step 1: Computing all $N$ quantities in $O(n)$.}
@@ -299,33 +307,32 @@ By above proposition, we have
 
     \textbf{Conclusion:} By Proposition 5.3 (dynamic programming on trees), the re-rooting operations along the spine can be performed efficiently. Since each of the three steps requires $O(n)$ time, the total time complexity is $O(n)$.
 \end{proof}
-\end{proof}
 
 
 
-\subsubsection{Dynamic Programming for Objective Evaluation}
+% \subsubsection{Dynamic Programming for Objective Evaluation}
 
-To efficiently compute $f(u,v)$ for any pair $(u,v)$, we employ a dynamic programming approach using two depth-first search (DFS) passes along the branch $u \to v$:
+% To efficiently compute $f(u,v)$ for any pair $(u,v)$, we employ a dynamic programming approach using two depth-first search (DFS) passes along the branch $u \to v$:
 
-\begin{enumerate}
-\item \textbf{Size computation pass}: Root the tree $T$ at vertex $u$ and compute, for every node $a$, the subtree sizes:
-\begin{align}
-\mathrm{sz}_+(a) &= |\{z \in \text{subtree}(a) : y(z) = +1\}|, \\
-\mathrm{sz}_-(a) &= |\{z \in \text{subtree}(a) : y(z) = -1\}|.
-\end{align}
+% \begin{enumerate}
+% \item \textbf{Size computation pass}: Root the tree $T$ at vertex $u$ and compute, for every node $a$, the subtree sizes:
+% \begin{align}
+% \mathrm{sz}_+(a) &= |\{z \in \text{subtree}(a) : y(z) = +1\}|, \\
+% \mathrm{sz}_-(a) &= |\{z \in \text{subtree}(a) : y(z) = -1\}|.
+% \end{align}
 
-\item \textbf{Distance accumulation pass}: Still with the tree rooted at $u$, accumulate the weighted distances:
-\begin{align}
-\mathrm{dist}_+(a) &= \sum_{\substack{z \in \text{subtree}(a)\\ y(z) = +1}} d(z,a), \\
-\mathrm{dist}_-(a) &= \sum_{\substack{z \in \text{subtree}(a)\\ y(z) = -1}} d(z,a).
-\end{align}
+% \item \textbf{Distance accumulation pass}: Still with the tree rooted at $u$, accumulate the weighted distances:
+% \begin{align}
+% \mathrm{dist}_+(a) &= \sum_{\substack{z \in \text{subtree}(a)\\ y(z) = +1}} d(z,a), \\
+% \mathrm{dist}_-(a) &= \sum_{\substack{z \in \text{subtree}(a)\\ y(z) = -1}} d(z,a).
+% \end{align}
 
-These values are then combined along the unique path $u \to v$ to obtain $f_+(u,v)$. By symmetry, rooting the tree at $v$ yields $f_-(v,u)$.
-\end{enumerate}
+% These values are then combined along the unique path $u \to v$ to obtain $f_+(u,v)$. By symmetry, rooting the tree at $v$ yields $f_-(v,u)$.
+% \end{enumerate}
 
-Since our augmented tree has a spine-and-spoke structure (essentially a path with leaves), all tree traversals can be performed in linear time.
+% Since our augmented tree has a spine-and-spoke structure (essentially a path with leaves), all tree traversals can be performed in linear time.
 
-\subsubsection{Complete Algorithm}
+\subsubsection{Algorithm}
 
 \begin{algorithm}[htbp]
 \caption{SVM on Tree Algorithm}
@@ -370,15 +377,15 @@ The overall time complexity of Algorithm~\ref{alg:svm_tree} is $O(nd + n \log n)
 
 This represents a significant improvement over exhaustive search, which would require $O(n^2)$ pair evaluations, each taking $O(n)$ time for objective computation.
 
-\subsubsection{Optimization Problem Statement}
+% \subsubsection{Optimization Problem Statement}
 
-The core optimization problem solved by our algorithm is:
+% The core optimization problem solved by our algorithm is:
 
-\begin{problem}[SVM on Tree]
-Given the augmented tree $T$ and loss function $L(\cdot,\cdot)$, find:
-\[
-(s^*,p^*) = \arg\min_{(s,p): y(s) \neq y(p)} L(s,p) = \arg\min_{(s,p): y(s) \neq y(p)} [f(s,p) - d(s,p)].
-\]
-\end{problem}
+% \begin{problem}[SVM on Tree]
+% Given the augmented tree $T$ and loss function $L(\cdot,\cdot)$, find:
+% \[
+% (s^*,p^*) = \arg\min_{(s,p): y(s) \neq y(p)} L(s,p) = \arg\min_{(s,p): y(s) \neq y(p)} [f(s,p) - d(s,p)].
+% \]
+% \end{problem}
 
-By Theorem~\ref{thm:adjacency}, this optimization reduces to considering only adjacent opposite-label projection pairs on the spine, dramatically reducing the search space from $O(n^2)$ to $O(n)$ candidates.
+% By Theorem~\ref{thm:adjacency}, this optimization reduces to considering only adjacent opposite-label projection pairs on the spine, dramatically reducing the search space from $O(n^2)$ to $O(n)$ candidates.
