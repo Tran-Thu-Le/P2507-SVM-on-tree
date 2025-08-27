@@ -52,7 +52,7 @@ The total noise is
 f(u,v) = f_+(u,v) + f_-(v,u)
 \end{align}
 
-\addLE{We define the margin as the distance between two support vectors
+We define the margin as the distance between two support vectors
 \begin{equation*}
     d(u,v).
 \end{equation*}
@@ -61,7 +61,7 @@ Since we aim to minimize the noise while maximizing the margin, the total loss f
     L_\lambda(u,v) = f(u,v) - \lambda \cdot d(u,v).
 \end{equation*}
 where $\lambda \geq 0$ is a parameter which controls the balance between the noise and the margin.
-}
+
 
 
 In this work, we focus on the case $\lambda=1$ and write $L(u,v) = f(u,v) - d(u,v)$. The decision boundary corresponding to a support pair $(s,p)$ is the perpendicular bisector hyperplane of the segment $sp$ in $\mathbb{R}^d$.
