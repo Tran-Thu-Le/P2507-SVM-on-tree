@@ -1,12 +1,26 @@
 \section{Introduction}
 
+\remLE{General introduction about SVM and its important role}
 Support Vector Machines (SVMs) have established themselves as one of the most powerful and theoretically well-founded approaches to machine learning since their introduction by Vapnik and colleagues in the 1990s. The fundamental principle of SVMs lies in finding an optimal separating hyperplane that maximizes the margin between different classes, providing both strong theoretical guarantees and excellent empirical performance across a wide range of applications.
 
-Traditional SVMs excel in scenarios where data can be effectively separated by linear or kernel-induced nonlinear boundaries in high-dimensional feature spaces. However, many real-world datasets exhibit complex geometric structures that are not naturally captured by conventional distance metrics or kernel functions. In particular, when data points are embedded in or naturally associated with tree-like or hierarchical structures, standard SVM approaches may fail to exploit the inherent geometric relationships that could improve classification performance.
+\remLE{Challenge about complexity for large-scale SVM models}
 
-Tree structures arise naturally in numerous domains: phylogenetic trees in bioinformatics represent evolutionary relationships between species, social networks often exhibit hierarchical community structures, and many machine learning problems involve data with natural tree-like dependencies. In such contexts, the Euclidean distance used by traditional SVMs may not reflect the true similarity or dissimilarity between data points, as it ignores the underlying structural constraints.
 
-This paper introduces a novel extension of Support Vector Machines that operates directly on tree structures, which we call \textbf{SVM on Tree}. Our approach constructs an augmented tree representation from the original data and formulates the classification problem as an optimization over support pairs within this tree structure. The key innovation lies in developing a tree-based distance metric that respects the geometric constraints of the tree while maintaining the theoretical foundations of SVM optimization.
+
+\remLE{To reduce the complexity are are numerous methods.}
+Among them, we observe that there are some main research directions
+
+\remLE{The first line of research is to use more efficient algorithms.} 
+
+
+\remLE{The second line of research is to exploit the structure of the optimal solutions to derive efficient solving methods: e.g. safe screening to reduce the problem size, like safe screening for Lasso or SVM.}
+
+
+\remLE{The third line of research is to approximate the data with simple graph, like tree and graph, then exploit the graph structure to design efficient solving method, like in OT on tree. There exist method to project data point to path and solve SVM model on path.}
+
+
+
+This paper follows the third line of research. We introduce a novel variant of SVM model, that operates directly on tree structures, which we call \emph{SVM model on Tree}. Our approach constructs an augmented tree representation from the original data and formulates the classification problem as an optimization over support pairs within this tree structure. The key innovation lies in developing a tree-based distance metric that respects the geometric constraints of the tree \remLE{WRONG} while maintaining the theoretical foundations of SVM optimization.
 
 Our main contributions are:
 \begin{enumerate}

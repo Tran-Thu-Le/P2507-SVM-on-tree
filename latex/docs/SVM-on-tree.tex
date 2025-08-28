@@ -4,7 +4,7 @@
 
 In this section, we present a novel approach to binary classification using SVM on tree structures. We first construct an augmented labeled tree from the training data. Second, we formulate a SVM model on tree. Third, we study the theoretial property of the model. Finally, we leverage the established property to propose combinatorial methods solving the problem efficiently.
 
-\subsection{Tree-based approximation}
+\subsection{Tree-based approximation for data points}
 \label{sec:tree-based-approximation}
 Given a training dataset $\{(x_i,y_i)\in \mathbb{R}^d \times \{-1,+1\}: i=1,..., n\}$, we describe a procedure for constructing a tree that approximates the dataset.
 
@@ -89,9 +89,19 @@ where $\lambda \geq 0$ is a parameter which controls the balance between the noi
 
 
 The decision boundary corresponding to a support pair $(s,p)$ is the perpendicular bisector hyperplane of the segment between $s$ and $p$ in $\mathbb{R}^d$. 
-\remLE{help me discuss the way to do prediction.}
+\remLE{help me discuss the way to do prediction: Given new data point, describe the procedure to make prediction about its label.}
 
 \subsection{Training SVM model on tree with arbitrary parameter}
+
+By definition of SVM model on tree, the naive training approach for  such a model needs the evaluation of objectives for all pairs of nodes. Since there are $O(n^2)$ nodes and $O(n)$ time for computing the objective, the overall complexity for such naive approach is $O(n^3)$.
+
+
+\remLE{I predict that we can reduce this complexity}
+\begin{theorem}
+    For any $\lambda \geq 0$, we can find the support nodes in $O(n^2)$.
+\end{theorem}
+
+\remLE{For now, we don't really know how to do it. Since the distance matric on tree can be computed in $O(n^2)$. So, the remaining task is to show that $f(u, v)$ should be computed in $O(n^2)$.}
 
 \subsection{Training SVM model on tree with unit parameter}
 
@@ -208,6 +218,8 @@ For $\lambda = 1$, there exists an optimal support pair $(s^*,p^*)$ consisting o
 
 
 \subsection{Algorithm and Complexity Analysis}
+
+In this section, we focus on the  design of an efficient algorithm for training SVM model on tree with $\lambda=1$.
 
 \subsubsection{Preprocessing} 
 
