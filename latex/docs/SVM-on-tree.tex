@@ -6,7 +6,9 @@ In this section, we present a novel approach to binary classification using SVM 
 
 \subsection{Tree-based approximation}
 \label{sec:tree-based-approximation}
-Given a training dataset $\{(x_i,y_i)\in \mathbb{R}^d \times \{-1,+1\}: i=1,..., n\}$, we describe a procedure for constructing a tree that approximates the dataset. Let $\Delta$ be a line in $\mathbb{R}^d$. In this work, we focus on the line $\Delta$ connecting the two class means. For each $i=1,\ldots,n$, let $x'_i$ denote the orthogonal projection of $x_i$ onto $\Delta$. The tree is then built with vertices consisting of both the original points $x_i$ and their projections $x'_i$. Its edge set includes (i) spline edges, which are the line segments connecting consecutive projection points along $\Delta$, and (ii) spoke edges, which are the line segments connecting each original point $x_i$ to its projection $x'_i$. The details of this construction are described below.
+Given a training dataset $\{(x_i,y_i)\in \mathbb{R}^d \times \{-1,+1\}: i=1,..., n\}$, we describe a procedure for constructing a tree that approximates the dataset.
+
+Let $\Delta$ be a line in $\mathbb{R}^d$. In this work, we focus on the line $\Delta$ connecting the two class means. For each $i=1,\ldots,n$, let $x'_i$ denote the orthogonal projection of $x_i$ onto $\Delta$. The tree is then built with vertices consisting of both the original points $x_i$ and their projections $x'_i$. Its edge set includes (i) spine edges, which are the line segments connecting consecutive projection points along $\Delta$, and (ii) spoke edges, which are the line segments connecting each original point $x_i$ to its projection $x'_i$. The details of this construction are described below.
 
 
 Let $V_- = \{x_i : y_i = -1\}$ and $V_+ = \{x_i : y_i = +1\}$.
@@ -35,11 +37,11 @@ The projected points $\{x_i'\}$ are then sorted by their projection coordinates 
 
 We construct an augmented tree $T=(V,E)$ with vertex set
 \begin{equation*}
-V = {x_1, ...., x_n} \cup {x'_1,..., x'_n},
+V = \{x_1, ...., x_n\} \cup \{x'_1,..., x'_n\},
 \end{equation*}
 and edge set
 \begin{equation*}
-E = {(x'i, x'{i+1}): i=1,..., n-1} \cup {(x_i, x'_i): i=1,..., n}.
+E = \{(x'_i, x'_{i+1}): i=1,..., n-1\} \cup \{(x_i, x'_i): i=1,..., n\}.
 \end{equation*}
 We refer to edges connecting two adjacent projection points as \emph{spine edges}, and to edges connecting each original point with its projection as \emph{spoke edges}. The path formed by the sequence of all spine edges is called the \emph{spine} of the tree.
 
@@ -47,18 +49,33 @@ The tree $T$ is endowed with vertex labels and edge lengths as follows. Each $x_
 
 \subsection{SVM model on tree}
 
-Let $T$ be a tree constructed in \Cref{sec:tree-based-approximation}.
-For two vertices $u,v$ in $T$ with different labels, we define the noise terms:
+
+From XXX, we know that the formulation of the SVM model strongly relies on the support vectors, which are points with different labels.
+Let $T$ be the tree constructed in \Cref{sec:tree-based-approximation}.
+We focus on a pair of vertices with different labels, say 
+\begin{equation*}
+    u \in V_+ \text{ and } v \in V_-,
+\end{equation*}
+which is the analog of support vectors in the tree context.
+We seek such pairs of nodes satisfying two criteria.
+
+First, the margin in the classical SVM is modeled as the distance between two support nodes, say $d(u,v)$.
+Second, we introduce the notion of noisy nodes in the tree.
+Consider a positive support node $u$, and among the subtrees rooted at $u$, take the branch containing the negative node $v$.
+We regard the positive nodes on the same branch as $v$ as positive noisy nodes.
+This motivates the definition of the set of positive noisy nodes, denoted by $V_+(u,v)$, as the set of positively labeled vertices in the subtree on the branch rooted at $u$ toward $v$.
+Similarly, we define $V_-(v,u)$ as the set of negatively labeled vertices on the branch rooted at $v$ toward $u$, referred to as negative noisy nodes.
+
+We define the positive and negative noise function of $u$ and $v$ as follows:
 \begin{align}
 f_+(u,v) &= \sum_{z\in V_+(u,v)} d(z,u), \\
-f_-(v,u) &= \sum_{z\in V_-(v,u)} d(z,v),
+f_-(v,u) &= \sum_{z\in V_-(v,u)} d(z,v).
 \end{align}
-where $V_+(u,v)$ (respectively $V_-(v,u)$) is the set of positive (respectively negative) labeled vertices in the subtree on the branch from $u$ toward $v$ (respectively from $v$ toward $u$) when the tree is rooted at $u$ (respectively at $v$).
-
 The total noise is
-\begin{align}
-f(u,v) = f_+(u,v) + f_-(v,u)
-\end{align}
+\begin{equation*}
+    f(u,v) = f_+(u,v) + f_-(v,u)
+\end{equation*}
+Note that the order of $(u, v)$ is important in XXX, while not important in XXX.
 
 We define the margin as the distance between two support vectors
 \begin{equation*}
@@ -71,41 +88,43 @@ Since we aim to minimize the noise while maximizing the margin, the total loss f
 where $\lambda \geq 0$ is a parameter which controls the balance between the noise and the margin.
 
 
+The decision boundary corresponding to a support pair $(s,p)$ is the perpendicular bisector hyperplane of the segment between $s$ and $p$ in $\mathbb{R}^d$. 
+\remLE{help me discuss the way to do prediction.}
 
-In this work, we focus on the case $\lambda=1$ and write $L(u,v) = f(u,v) - d(u,v)$. The decision boundary corresponding to a support pair $(s,p)$ is the perpendicular bisector hyperplane of the segment $sp$ in $\mathbb{R}^d$.
+\subsection{Training SVM model on tree with arbitrary parameter}
 
-% \subsection{Theoretical Properties}
-\subsection{Adjacency property for unit parameter}
+\subsection{Training SVM model on tree with unit parameter}
 
-
-In this subsection, we establish the key theoretical properties of our SVM on tree formulation, focusing on the case $\lambda=1$.
-
-\begin{figure}[htbp]
-  \centering
-  \begin{tikzpicture}[scale=1.5, thick]
-    % Vertices
-    \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_4$] (P4) at (0,0) {};
-    \node[draw, circle, fill=black, inner sep=2pt, label=above:$s$] (S) at (2,0) {};
-    \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_2$] (P2) at (4,0) {};
-    \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_1$] (P1) at (6,0) {};
-    \node[draw, circle, fill=black, inner sep=2pt, label=below:$p_3$] (P3) at (4,-1.5) {};
-
-    % Edges with labels
-    \draw (P4) -- node[above] {$z$} (S);
-    \draw (S) -- node[above] {$x$} (P2);
-    \draw (P2) -- node[above] {$y$} (P1);
-    \draw (P2) -- (P3);
-  \end{tikzpicture}
-  \caption{Tree structure illustrating nodes $s$, $p_1$, $p_2$, $p_3$, and $p_4$ with edge weights $x$, $y$, and $z$.}
-  \label{fig:tree_nodes}
-\end{figure}
+% \subsubsection{Adjacency property for unit parameter}
 
 
 
-We now establish a fundamental property that significantly reduces the search space for optimal support pairs.
+% \begin{figure}[htbp]
+%   \centering
+%   \begin{tikzpicture}[scale=1.5, thick]
+%     % Vertices
+%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_4$] (P4) at (0,0) {};
+%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$s$] (S) at (2,0) {};
+%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_2$] (P2) at (4,0) {};
+%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_1$] (P1) at (6,0) {};
+%     \node[draw, circle, fill=black, inner sep=2pt, label=below:$p_3$] (P3) at (4,-1.5) {};
+
+%     % Edges with labels
+%     \draw (P4) -- node[above] {$z$} (S);
+%     \draw (S) -- node[above] {$x$} (P2);
+%     \draw (P2) -- node[above] {$y$} (P1);
+%     \draw (P2) -- (P3);
+%   \end{tikzpicture}
+%   \caption{Tree structure illustrating nodes $s$, $p_1$, $p_2$, $p_3$, and $p_4$ with edge weights $x$, $y$, and $z$.}
+%   \label{fig:tree_nodes}
+% \end{figure}
 
 
-Let $s \in V_+$ and $p_1, p_2\in V_-$ and $p_2$ is in the path connecting $s$ and $p_1$, \ie
+In this subsection, we establish a key theoretical properties of our SVM on tree formulation, focusing on the case $\lambda=1$. Specifically, we show that the two support nodes are adjacent and lies on the spine of the tree. 
+This fundamental property significantly reduces the search space for optimal support pairs.
+
+
+Let $s \in V_+$ and $p_1, p_2\in V_-$ such that $p_2$ is in the path connecting $s$ and $p_1$, \ie
 \begin{equation}
     d(s, p_1) = d(s, p_2) + d(p_2, p_1)
     \label{eq:distance-decomposition}
@@ -114,6 +133,10 @@ Define the residual of vertex set
 \begin{equation*}
     R = V_-(p_1, s) \setminus V_-(p_2, s).
 \end{equation*}
+Please refer to Figure XXX. 
+
+
+
 The following result establish the difference between the two noise functions.
 \begin{lemma}
     We have 
@@ -180,11 +203,11 @@ For $\lambda = 1$, there exists an optimal support pair $(s^*,p^*)$ consisting o
     \end{equation*}
     Since $(s, p_1)$ is optimal, $(s, p_2)$ is also optimal. This completes the proof.
 
-    Note that, there exists an optimal pair $(s^*, p^*)$ lying on the spine. Otherwise, assume that $p^*$ not on the spine, \ie it is the original point, let $p'$ be its projection, then it is clear that $p'$ has the same sign as $p^*$ while closer to $s$. Thus $(s^*, p')$ is also optimal with $p'$ on spine. If $s^*$ is not on the spine, we repeat the same argument. We complete the proof.
+    \remLE{Hel me write this in details} Note that, there exists an optimal pair $(s^*, p^*)$ lying on the spine. Otherwise, assume that $p^*$ not on the spine, \ie it is the original point, let $p'$ be its projection, then it is clear that $p'$ has the same sign as $p^*$ while closer to $s$. Thus $(s^*, p')$ is also optimal with $p'$ on spine. If $s^*$ is not on the spine, we repeat the same argument. We complete the proof.
 \end{proof}
 
 
-\subsection{Algorithm and Computational Complexity}
+\subsection{Algorithm and Complexity Analysis}
 
 \subsubsection{Preprocessing} 
 
@@ -192,7 +215,7 @@ Recall $x'_1, ...,x'_n$ are projections of $x_1,..., x_n$ and we assume that $x'
 To compute the total loss, we only need $f(x'_i, x'_{i+1})$ for $i=1,.., n-1$. In the following, we will clarify how to compute these values efficiently using dynamic programming.
 
 
-For $i = 1, ...., n-1$, we define 
+For $i = 1, ...., n-1$, we define data at iteration $i$ as
 \begin{align*}
     N^{>i}_+  & = |\{v \in V_+(x'_i, x'_{i+1})\}| = 2 |\{j > i: y_j=+1\}|\\
     N^{>i}_-  & = |\{v \in V_-(x'_i, x'_{i+1})\}| = 2 |\{j > i: y_j=-1\}|\\
@@ -215,13 +238,17 @@ Consider $i = 1, ...., n-1$. If $y_i = -1$ and $y_{i+1}=+1$, we then have
 \begin{equation*}
     f(x'_i, x'_{i+1}) = d^{>i}_- + d^{\leq i}_+.
 \end{equation*}
-Else, that is $y_i = +1$ and $y_{i+1}=-1$, then 
+Otherwise, $y_i = +1$ and $y_{i+1}=-1$, then 
 \begin{equation*}
     f(x'_i, x'_{i+1}) = d^{>i}_+ + d^{\leq i}_-.
 \end{equation*}
 
+Therefore, to compute the total noise function, we should have an efficient method to compute $(d^{>i}_+, d^{>i}_-, d^{\leq i}_+, d^{\leq i}_-)$. This can be achived using the dynamic updates.
+
+The following proposition claims that how the information of $N^{\leq i}_-$ and $d^{\leq i}_-$ can be used to derive  $N^{\leq i+1}_-$ and $d^{\leq i+1}_-$ efficiently. The proof of the proposition will show the procedure in details.
+
 \begin{proposition}
-    For $i=1,..., n-1$, if we have $N^{\leq i}_-$ and $d^{\leq i}_-$, then we can update $N^{\leq i+1}_-$ and $d^{\leq i+1}_-$.
+    For $i=1,..., n-1$, if we have $N^{\leq i}_-$ and $d^{\leq i}_-$, then we can update $N^{\leq i+1}_-$ and $d^{\leq i+1}_-$ in constant time.
 \end{proposition}
 \begin{proof}
     By definition,
@@ -260,7 +287,7 @@ Else, that is $y_i = +1$ and $y_{i+1}=-1$, then
     Clearly, each update step only uses quantities known at step $i$ and distances between consecutive spine points, so it can be performed in constant time. Therefore, knowing $N^{\le i}_-$ and $d^{\le i}_-$ is sufficient to update $N^{\le i+1}_-$ and $d^{\le i+1}_-$.
 \end{proof}
 
-By above proposition, we have
+Extending above proposition, we obtain the following result.
 \begin{proposition}
     We can compute the following quantities in $O(n)$.
     \begin{enumerate}
@@ -270,9 +297,9 @@ By above proposition, we have
     \end{enumerate}
 \end{proposition}
 \begin{proof}
-    We prove this by applying the previous proposition in a systematic manner, using the dynamic programming technique on trees (Proposition 5.3).
+    We prove this by applying the Proposition XXX in a systematic manner, using the dynamic programming technique on trees.
 
-    \textbf{Step 1: Computing all $N$ quantities in $O(n)$.}
+    \textit{Step 1: Computing all counting quantities in $O(n)$.}
     The counting quantities can be computed by simple linear scans:
     \begin{itemize}
         \item $N^{>i}_+, N^{>i}_-$: Scan from right to left, counting positive/negative labels.
@@ -280,16 +307,16 @@ By above proposition, we have
     \end{itemize}
     Each quantity is updated in $O(1)$ per position, giving total $O(n)$ time.
 
-    \textbf{Step 2: Computing all $d$ quantities using dynamic programming on trees.}
-    This is where we apply Proposition 5.3 (dynamic programming on trees). The key insight is that our augmented tree has a spine structure, which allows efficient re-rooting operations.
+    \textit{Step 2: Computing all distance quantities in $O(n)$.}
+    This is where we apply Proposition XXX. The key insight is that our augmented tree has a spine structure, which allows efficient re-rooting operations.
 
-    \textbf{Left-to-right pass} (computing $d^{\leq i}_+, d^{\leq i}_-$):
+    Left-to-right pass for computing $d^{\leq i}_+, d^{\leq i}_-$:\remLE{check index carefully}
     \begin{itemize}
         \item Initialize: $d^{\leq 1}_+ = 2d(x'_1, x'_2) + d(x_1, x'_2)$ if $y_1 = +1$, else $0$.
-        \item For $i = 1, 2, \ldots, n-2$: Apply Proposition 1 (and its symmetric version for positive labels) to update $d^{\leq i+1}_\pm$ from $d^{\leq i}_\pm$ in $O(1)$ time.
+        \item For $i = 1, \ldots, n-2$: Apply Proposition 1 (and its symmetric version for positive labels) to update $d^{\leq i+1}_\pm$ from $d^{\leq i}_\pm$ in $O(1)$ time.
     \end{itemize}
 
-    \textbf{Right-to-left pass} (computing $d^{>i}_+, d^{>i}_-$):
+    Right-to-left pass for computing $d^{>i}_+, d^{>i}_-$:
     \begin{itemize}
         \item Initialize: $d^{>n-1}_+ = 0, d^{>n-1}_- = 0$ (no points beyond position $n-1$).
         \item For $i = n-1, n-2, \ldots, 2$: Use the symmetric update formula to compute $d^{>(i-1)}_\pm$ from $d^{>i}_\pm$ in $O(1)$ time.
@@ -297,15 +324,15 @@ By above proposition, we have
 
     The symmetric update formula for the right-to-left pass is obtained by reversing the roles: when moving from anchor $x'_{i+1}$ to $x'_i$, all points $j > i$ have their distances increased by $d(x'_i, x'_{i+1})$, and if $y_i = -1$, we add the contribution of the new point $i$.
 
-    \textbf{Step 3: Computing $f(x'_i, x'_{i+1})$ in $O(n)$.}
-    Once all $N$ and $d$ quantities are computed, we can evaluate $f(x'_i, x'_{i+1})$ for each $i = 1, \ldots, n-1$ using the given formulas:
-    \begin{itemize}
-        \item If $y_i = -1, y_{i+1} = +1$: $f(x'_i, x'_{i+1}) = d^{>i}_- + d^{\leq i}_+$.
-        \item If $y_i = +1, y_{i+1} = -1$: $f(x'_i, x'_{i+1}) = d^{>i}_+ + d^{\leq i}_-$.
-    \end{itemize}
+    \textit{Step 3: Computing $f(x'_i, x'_{i+1})$ in $O(n)$.}
+    Once all counting and distance quantities are computed, we can evaluate $f(x'_i, x'_{i+1})$ for each $i = 1, \ldots, n-1$ using the given formulas in XXX.
+    % \begin{itemize}
+    %     \item If $y_i = -1, y_{i+1} = +1$: $f(x'_i, x'_{i+1}) = d^{>i}_- + d^{\leq i}_+$.
+    %     \item If $y_i = +1, y_{i+1} = -1$: $f(x'_i, x'_{i+1}) = d^{>i}_+ + d^{\leq i}_-$.
+    % \end{itemize}
     Each evaluation takes $O(1)$ time, giving total $O(n)$ time.
 
-    \textbf{Conclusion:} By Proposition 5.3 (dynamic programming on trees), the re-rooting operations along the spine can be performed efficiently. Since each of the three steps requires $O(n)$ time, the total time complexity is $O(n)$.
+    % \textbf{Conclusion:} By Proposition 5.3 (dynamic programming on trees), the re-rooting operations along the spine can be performed efficiently. Since each of the three steps requires $O(n)$ time, the total time complexity is $O(n)$.
 \end{proof}
 
 
@@ -332,35 +359,38 @@ By above proposition, we have
 
 % Since our augmented tree has a spine-and-spoke structure (essentially a path with leaves), all tree traversals can be performed in linear time.
 
-\subsubsection{Algorithm}
+\subsubsection{Algorithm and Complexity Analysis}
+
 
 \begin{algorithm}[htbp]
-\caption{SVM on Tree Algorithm}
+\caption{SVM on Tree}
 \label{alg:svm_tree}
 \begin{algorithmic}[1]
 \STATE \textbf{Input:} Labeled dataset $\{(x_i,y_i)\}_{i=1}^n \subset \mathbb{R}^d \times \{-1,+1\}$
-\STATE \textbf{Output:} Optimal support pair $(s^*,p^*)$ and decision boundary
+\STATE \textbf{Output:} Optimal support pair $(s^*,p^*)$
 
 \STATE Compute class means $\mu_-$, $\mu_+$ and spine direction $w$
 \STATE Project all points: $x_i' = \mu_- + \langle x_i-\mu_-, w\rangle w$ for $i = 1,\ldots,n$
 \STATE Sort projections $\{x_i'\}$ by coordinate $t_i = \langle x_i-\mu_-, w\rangle$
-\STATE Construct augmented tree $T$ with spoke and spine edges
-\STATE Initialize $L_{\min} = \infty$, $(s^*,p^*) = \emptyset$
+\STATE Construct augmented tree $T$ with spoke and spine edges (see XXX)
+\STATE Initialize $L_{\min} = \infty$ %, $(s^*,p^*) = \emptyset$
+\STATE Compute $f(x'_i, x'_{i+1})$ for all $i=1,..., n-1$ using preprocessing step in XXX
+\STATE Compute the total loss $L_1(x'_i, x'_{i+1}) = f(x'_i, x'_{i+1}) -d(x'_i, x'_{i+1})$ for all $i=1,..., n-1$
+\STATE Let $(s^*,p^*)=(x'_i, x'_{i+1})$ where $(x'_i, x'_{i+1})$ is  the pair with minimum total loss $L_1(x'_i, x'_{i+1})$ and $y_i\neq y_{i+1}$
+% \FOR{$i=1,..., n-1$}
+%     \STATE Let $(s,p) = (x'_i, x'_{i+1})$ with $y_i \neq y_{i+1}$
+%     % \STATE Compute $f(s,p)$ using XXX and XXX
+%     \STATE Calculate $L(s,p) = f(s,p) - d(s,p)$
+%     \IF{$L(s,p) < L_{\min}$}
+%         \STATE $L_{\min} = L(s,p)$
+%         \STATE $(s^*,p^*) = (s,p)$
+%     \ENDIF
+% \ENDFOR
 
-\FOR{each pair of adjacent spine vertices $(s,p)$ with $y(s) \neq y(p)$}
-    \STATE Compute $f(s,p)$ using two DFS passes
-    \STATE Calculate $L(s,p) = f(s,p) - d(s,p)$
-    \IF{$L(s,p) < L_{\min}$}
-        \STATE $L_{\min} = L(s,p)$
-        \STATE $(s^*,p^*) = (s,p)$
-    \ENDIF
-\ENDFOR
-
-\STATE \textbf{return} $(s^*,p^*)$ and perpendicular bisector of segment $s^*p^*$
+\STATE \textbf{return} $(s^*,p^*)$ % and perpendicular bisector of segment $s^*p^*$
 \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Complexity Analysis}
 
 The computational complexity of our algorithm is analyzed as follows:
 
@@ -368,14 +398,15 @@ The computational complexity of our algorithm is analyzed as follows:
 \item \textbf{Projection step}: Computing projections for $n$ points in $\mathbb{R}^d$ requires $O(nd)$ operations.
 \item \textbf{Sorting step}: Sorting $n$ projections by their coordinates takes $O(n \log n)$ time.
 \item \textbf{Tree construction}: Building the augmented tree with $n$ spoke edges and $O(n)$ spine edges requires $O(n)$ time.
-\item \textbf{Objective evaluation}: Each DFS pass takes $O(n)$ time, and there are $O(n)$ adjacent pairs to evaluate due to Theorem~\ref{thm:adjacency}.
+\item \textbf{Objective evaluation}: Each step XXX takes $O(n)$ time, and there are $O(n)$ adjacent pairs to evaluate due to Theorem~\ref{thm:adjacency}.
 \end{itemize}
 
+We finally obtain
 \begin{theorem}[Complexity]
 The overall time complexity of Algorithm~\ref{alg:svm_tree} is $O(nd + n \log n)$, or $O(n \log n)$ for fixed dimension $d$.
 \end{theorem}
 
-This represents a significant improvement over exhaustive search, which would require $O(n^2)$ pair evaluations, each taking $O(n)$ time for objective computation.
+This represents a significant improvement over exhaustive search, which would require $O(n^2)$ \remLE{check} pair evaluations, each taking $O(n)$ time for objective computation.
 
 % \subsubsection{Optimization Problem Statement}
 
