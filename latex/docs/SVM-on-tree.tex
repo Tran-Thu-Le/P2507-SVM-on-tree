@@ -103,6 +103,21 @@ By definition of SVM model on tree, the naive training approach for  such a mode
 
 \remLE{For now, we don't really know how to do it. Since the distance matric on tree can be computed in $O(n^2)$. So, the remaining task is to show that $f(u, v)$ should be computed in $O(n^2)$.}
 
+Here we should define preprocessing wih definition of 
+\begin{align*}
+    d^{<i}_+ & = ...\\
+    d^{<i}_- & = ...\\
+    d^{>i}_+ & = ...\\
+    d^{>i}_- & = ...\\
+\end{align*}
+
+If $y_i=+1$, we have 
+\begin{align*}
+    f_+(x_i) & = d^{<i}_+ +  d^{>i}_+ + (N_+ -1) \|x_i -x'_i\|_2.\\
+    f_+(x'_i) & = d^{<i}_+ +  d^{>i}_+
+\end{align*}
+
+
 \subsection{Training SVM model on tree with unit parameter}
 
 % \subsubsection{Adjacency property for unit parameter}
