@@ -183,8 +183,7 @@ By definition of SVM model on tree, the naive training approach for  such a mode
 In the following, we will significantly reduce this complexity to $O(n^2)$.
 
 
-\textbf{Proof idea:} 
-For each relation $\sim$ can be $<, =, >, \leq, \geq$, let us define $20$ quantities \remLE{need meaning of them}
+For each index $i$, let us define $20$ quantities corresponding to five relations $\sim$ in $\{<, =, >, \leq, \geq\}$ \remLE{need meaning of them}
 \begin{align*}
     d^{\sim i}_\pm & = \sum_{j \sim i, y_j=\pm 1} d(x'_j, x'_i) + d(x_j, x'_i),\\
     N^{\sim i}_\pm & = 2 |\{j \in \{1,..., n\}: j \sim i \text{ and } y_j=\pm 1\}|
@@ -204,7 +203,12 @@ As a result, we have
     For any $\lambda\geq 0$ and $u, v\in V$, we have $d(u, v)$, $f(u, v)$ and $L_\lambda(u, v)$ can be computed in $O(n^2)$.
 \end{proposition}
 \begin{proof}
-    \remHUAN{Huan will prove this}
+    
+
+    It is well known that $d(u, v)$ will be computed in $O(n^2)$. If $f(u, v)$ can also be computed in $O(n^2)$, then we know all $L_\lambda(u, v)$. In the remaining of the proof, we focus on the cumputation of $f(u, v)$.
+
+
+    \remHUAN{Huan will prove this part. Le thinks that we can move the proof of the corresponding result when $\lambda=1$ to this part with a suitable proof modification.}
 \end{proof}
 
 The key insight is that we can compute the total loss function $L_\lambda(u, v) = f(u, v) - \lambda d(u, v)$ in $O(n^2)$. This can be achieved by a preprocessing step in which we all compute $f(u, v)$ and $d(u, v)$ in $O(n^2)$ for any pair of vertices $(u, v)$.  
@@ -420,137 +424,141 @@ For $\lambda = 1$, there exists an optimal support pair $(s^*,p^*)$ consisting o
 
 The adjacency property established in Theorem~\ref{thm:adjacency} is the cornerstone of our efficient algorithm. By restricting the search space to adjacent pairs on the spine, we reduce the problem from considering $O(n^2)$ potential support pairs to only $O(n)$ candidates. This dramatic reduction in complexity enables us to design practical algorithms with strong theoretical guarantees, as illustrated in \Cref{fig:adjacency}. % [LE: Added reference to adjacency figure]
 
-\subsection{Algorithm and Complexity Analysis}
-\label{subsec:algorithm}
+% \subsection{Algorithm and Complexity Analysis}
+% \label{subsec:algorithm}
 
 In this section, we focus on the  design of an efficient algorithm for training SVM model on tree with $\lambda=1$.
 
 \subsubsection{Preprocessing} 
 \label{sec:preprocessing} % [LE: Added section label for reference] 
 
-Recall $x'_1, \ldots,x'_n$ are projections of $x_1,\ldots, x_n$ and we assume that $x'_1, \ldots,x'_n$ have been sorted in a certain order, \eg by their first coordinates. By the adjacency property (Theorem~\ref{thm:adjacency}), we know that support vectors form a pair $(x'_i, x'_{i+1})$ with opposite signs. % [LE: Fixed ellipsis and XXX reference] The margin is clearly $d(x'_i, x'_{i+1}) = \|x'_i - x'_{i+1}\|_2$.
-To compute the total loss, we only need $f(x'_i, x'_{i+1})$ for $i=1,.., n-1$. In the following, we will clarify how to compute these values efficiently using dynamic programming.
+Recall $x'_1, \ldots,x'_n$ are projections of $x_1,\ldots, x_n$ and we assume that $x'_1, \ldots,x'_n$ have been sorted in a certain order, \eg by their first coordinates. By the adjacency property (Theorem~\ref{thm:adjacency}), we know that support vectors form a pair $(x'_i, x'_{i+1})$ with opposite signs. By previous section, we know that $f(x'_i, x'_{i+1})$ and, thus, $L_1(x'_i, x'_{i+1})$ can be precomputed in $O(n)$.
 
 
-For $i = 1, \ldots, n-1$, we define data at iteration $i$ as % [LE: Fixed ellipsis]
-\begin{align*}
-    N^{>i}_+  & = |\{v \in V_+(x'_i, x'_{i+1})\}| = 2 |\{j > i: y_j=+1\}|\\
-    N^{>i}_-  & = |\{v \in V_-(x'_i, x'_{i+1})\}| = 2 |\{j > i: y_j=-1\}|\\
-    N^{\leq i}_+  & = |\{v \in V_+(x'_{i+1}, x'_{i})\}| = 2 |\{j \leq  i: y_j=+1\}|\\
-    N^{\leq i}_-  & = |\{v \in V_+(x'_{i+1}, x'_{i})\}| = 2 |\{j \leq  i: y_j=-1\}|
-\end{align*}
-and
-\begin{align*}
-    d^{>i}_+  & = \sum_{v \in V_+(x'_i, x'_{i+1})} d(x'_i, v)
-    & = \sum_{j > i, y_j = +1 }[d(x'_i, x'_j) + d(x'_i, x_j)],\\
-    d^{>i}_-  & = \sum_{v \in V_-(x'_i, x'_{i+1})} d(x'_i, v)
-    & = \sum_{j > i, y_j = -1 }[d(x'_i, x'_j) + d(x'_i, x_j)],\\
-    d^{\leq i}_+  & = \sum_{v \in V_+(x'_{i+1}, x'_{i})} d(v, x'_{i+1})
-    & = \sum_{j \leq i, y_j = +1 }[d(x'_j, x'_{i+1}) + d(x_j, x'_{i+1})]\\
-    d^{\leq i}_-  & = \sum_{v \in V_-(x'_{i+1}, x'_{i})} d(v, x'_{i+1})
-    & = \sum_{j \leq i, y_j = -1 }[d(x'_j, x'_{i+1}) + d(x_j, x'_{i+1})].
-\end{align*}
+% [LE: Fixed ellipsis and XXX reference] The margin is clearly $d(x'_i, x'_{i+1}) = \|x'_i - x'_{i+1}\|_2$.
+% To compute the total loss, we only need $f(x'_i, x'_{i+1})$ for $i=1,.., n-1$. In the following, we will clarify how to compute these values efficiently using dynamic programming.
 
-Consider $i = 1, \ldots, n-1$. If $y_i = -1$ and $y_{i+1}=+1$, we then have % [LE: Fixed ellipsis] 
-\begin{equation*}
-    f(x'_i, x'_{i+1}) = d^{>i}_- + d^{\leq i}_+.
-\end{equation*}
-Otherwise, $y_i = +1$ and $y_{i+1}=-1$, then 
-\begin{equation*}
-    f(x'_i, x'_{i+1}) = d^{>i}_+ + d^{\leq i}_-.
-\end{equation*}
 
-Therefore, to compute the total noise function, we should have an efficient method to compute $(d^{>i}_+, d^{>i}_-, d^{\leq i}_+, d^{\leq i}_-)$. This can be achived using the dynamic updates.
+% For $i = 1, \ldots, n-1$, we define data at iteration $i$ as % [LE: Fixed ellipsis]
+% \begin{align*}
+%     N^{>i}_+  & = |\{v \in V_+(x'_i, x'_{i+1})\}| = 2 |\{j > i: y_j=+1\}|\\
+%     N^{>i}_-  & = |\{v \in V_-(x'_i, x'_{i+1})\}| = 2 |\{j > i: y_j=-1\}|\\
+%     N^{\leq i}_+  & = |\{v \in V_+(x'_{i+1}, x'_{i})\}| = 2 |\{j \leq  i: y_j=+1\}|\\
+%     N^{\leq i}_-  & = |\{v \in V_+(x'_{i+1}, x'_{i})\}| = 2 |\{j \leq  i: y_j=-1\}|
+% \end{align*}
+% and
+% \begin{align*}
+%     d^{>i}_+  & = \sum_{v \in V_+(x'_i, x'_{i+1})} d(x'_i, v)
+%     & = \sum_{j > i, y_j = +1 }[d(x'_i, x'_j) + d(x'_i, x_j)],\\
+%     d^{>i}_-  & = \sum_{v \in V_-(x'_i, x'_{i+1})} d(x'_i, v)
+%     & = \sum_{j > i, y_j = -1 }[d(x'_i, x'_j) + d(x'_i, x_j)],\\
+%     d^{\leq i}_+  & = \sum_{v \in V_+(x'_{i+1}, x'_{i})} d(v, x'_{i+1})
+%     & = \sum_{j \leq i, y_j = +1 }[d(x'_j, x'_{i+1}) + d(x_j, x'_{i+1})]\\
+%     d^{\leq i}_-  & = \sum_{v \in V_-(x'_{i+1}, x'_{i})} d(v, x'_{i+1})
+%     & = \sum_{j \leq i, y_j = -1 }[d(x'_j, x'_{i+1}) + d(x_j, x'_{i+1})].
+% \end{align*}
 
-The following proposition claims that how the information of $N^{\leq i}_-$ and $d^{\leq i}_-$ can be used to derive  $N^{\leq i+1}_-$ and $d^{\leq i+1}_-$ efficiently. The proof of the proposition will show the procedure in details.
+% Consider $i = 1, \ldots, n-1$. If $y_i = -1$ and $y_{i+1}=+1$, we then have % [LE: Fixed ellipsis] 
+% \begin{equation*}
+%     f(x'_i, x'_{i+1}) = d^{>i}_- + d^{\leq i}_+.
+% \end{equation*}
+% Otherwise, $y_i = +1$ and $y_{i+1}=-1$, then 
+% \begin{equation*}
+%     f(x'_i, x'_{i+1}) = d^{>i}_+ + d^{\leq i}_-.
+% \end{equation*}
 
-\begin{proposition}
-    For $i=1,\ldots, n-1$, if we have $N^{\leq i}_-$ and $d^{\leq i}_-$, then we can update $N^{\leq i+1}_-$ and $d^{\leq i+1}_-$ in constant time. % [LE: Fixed ellipsis]
-\end{proposition}
-\begin{proof}
-    By definition,
-    \[
-        d^{\leq i}_- = \sum_{\substack{j \le i \\ y_j=-1}} \big( d(x'_j, x'_{i+1}) + d(x_j, x'_{i+1}) \big),\qquad
-        d^{\leq i+1}_- = \sum_{\substack{j \le i+1 \\ y_j=-1}} \big( d(x'_j, x'_{i+2}) + d(x_j, x'_{i+2}) \big).
-    \]
-    First consider the sum over indices $j \le i$ with $y_j=-1$. Due to the tree structure consisting of the spine (connecting the $x'_k$ in order) and spokes (connecting each $x_k$ to its projection $x'_k$), for all $j \le i$, the unique path from $x'_j$ (or $x_j$) to $x'_{i+2}$ passes through $x'_{i+1}$. Therefore,
-    \[
-        d(x'_j, x'_{i+2}) = d(x'_j, x'_{i+1}) + d(x'_{i+1}, x'_{i+2}),\qquad
-        d(x_j,  x'_{i+2}) = d(x_j,  x'_{i+1}) + d(x'_{i+1}, x'_{i+2}).
-    \]
-    Summing over all $j \le i$ with $y_j=-1$, the increase due to shifting the anchor from $x'_{i+1}$ to $x'_{i+2}$ is
-    \[
-        N^{\le i}_- \cdot d(x'_{i+1}, x'_{i+2}),
-    \]
-    since $N^{\le i}_-$ counts exactly the number of negative vertices participating in the sum (each index $j$ contributes two vertices $x'_j$ and $x_j$).
+% Therefore, to compute the total noise function, we should have an efficient method to compute $(d^{>i}_+, d^{>i}_-, d^{\leq i}_+, d^{\leq i}_-)$. This can be achived using the dynamic updates.
 
-    Additionally, if $y_{i+1}=-1$, two new vertices appear in the region $\le i+1$, namely $x'_{i+1}$ and $x_{i+1}$. Their contribution to $d^{\le i+1}_-$ is
-    \[
-        d(x'_{i+1}, x'_{i+2}) + d(x_{i+1}, x'_{i+2})
-        = d(x'_{i+1}, x'_{i+2}) + \big( d(x_{i+1}, x'_{i+1}) + d(x'_{i+1}, x'_{i+2}) \big)
-        = 2\,d(x'_{i+1}, x'_{i+2}) + d(x_{i+1}, x'_{i+1}).
-    \]
-    Combining both parts, we obtain the update formulas for the two cases based on the label $y_{i+1}$:
-    \begin{align*}
-        N^{\le i+1}_- &= \begin{cases}
-            N^{\le i}_- + 2, & \text{if } y_{i+1}=-1,\\
-            N^{\le i}_-, & \text{if } y_{i+1}=+1,
-        \end{cases}\\[4pt]
-        d^{\le i+1}_- &= \begin{cases}
-            d^{\le i}_- + N^{\le i}_-\, d(x'_{i+1}, x'_{i+2}) + 2\,d(x'_{i+1}, x'_{i+2}) + d(x_{i+1}, x'_{i+1}), & \text{if } y_{i+1}=-1,\\
-            d^{\le i}_- + N^{\le i}_-\, d(x'_{i+1}, x'_{i+2}), & \text{if } y_{i+1}=+1.
-        \end{cases}
-    \end{align*}
-    Clearly, each update step only uses quantities known at step $i$ and distances between consecutive spine points, so it can be performed in constant time. Therefore, knowing $N^{\le i}_-$ and $d^{\le i}_-$ is sufficient to update $N^{\le i+1}_-$ and $d^{\le i+1}_-$.
-\end{proof}
+% The following proposition claims that how the information of $N^{\leq i}_-$ and $d^{\leq i}_-$ can be used to derive  $N^{\leq i+1}_-$ and $d^{\leq i+1}_-$ efficiently. The proof of the proposition will show the procedure in details.
 
-Extending above proposition, we obtain the following result.
-\begin{proposition}
-    We can compute the following quantities in $O(n)$.
-    \begin{enumerate}
-        \item $(N^{>i}_+, N^{>i}_-, N^{\leq i}_+, N^{\leq i}_-)$ for all $i=1,\ldots, n-1$ % [LE: Fixed ellipsis]
-        \item $(d^{>i}_+, d^{>i}_-, d^{\leq i}_+, d^{\leq i}_-)$ for all $i=1,\ldots, n-1$ % [LE: Fixed ellipsis]
-        \item $f(x'_i, x'_{i+1})$ for all $i=1,\ldots, n-1$. % [LE: Fixed ellipsis]
-    \end{enumerate}
-\end{proposition}
-\begin{proof}
-    We prove this by applying Proposition 5.1 systematically, using the dynamic programming technique on trees. % [LE: Fixed XXX reference to specific proposition about constant-time updates]
+% \begin{proposition}
+%     For $i=1,\ldots, n-1$, if we have $N^{\leq i}_-$ and $d^{\leq i}_-$, then we can update $N^{\leq i+1}_-$ and $d^{\leq i+1}_-$ in constant time. \remLE{this result has been proven in Section 5.3}
+% \end{proposition}
+% \begin{proof}
+%     By definition,
+%     \[
+%         d^{\leq i}_- = \sum_{\substack{j \le i \\ y_j=-1}} \big( d(x'_j, x'_{i+1}) + d(x_j, x'_{i+1}) \big),\qquad
+%         d^{\leq i+1}_- = \sum_{\substack{j \le i+1 \\ y_j=-1}} \big( d(x'_j, x'_{i+2}) + d(x_j, x'_{i+2}) \big).
+%     \]
+%     First consider the sum over indices $j \le i$ with $y_j=-1$. Due to the tree structure consisting of the spine (connecting the $x'_k$ in order) and spokes (connecting each $x_k$ to its projection $x'_k$), for all $j \le i$, the unique path from $x'_j$ (or $x_j$) to $x'_{i+2}$ passes through $x'_{i+1}$. Therefore,
+%     \[
+%         d(x'_j, x'_{i+2}) = d(x'_j, x'_{i+1}) + d(x'_{i+1}, x'_{i+2}),\qquad
+%         d(x_j,  x'_{i+2}) = d(x_j,  x'_{i+1}) + d(x'_{i+1}, x'_{i+2}).
+%     \]
+%     Summing over all $j \le i$ with $y_j=-1$, the increase due to shifting the anchor from $x'_{i+1}$ to $x'_{i+2}$ is
+%     \[
+%         N^{\le i}_- \cdot d(x'_{i+1}, x'_{i+2}),
+%     \]
+%     since $N^{\le i}_-$ counts exactly the number of negative vertices participating in the sum (each index $j$ contributes two vertices $x'_j$ and $x_j$).
 
-    \textit{Step 1: Computing all counting quantities in $O(n)$.}
-    The counting quantities can be computed by simple linear scans:
-    \begin{itemize}
-        \item $N^{>i}_+, N^{>i}_-$: Scan from right to left, counting positive/negative labels.
-        \item $N^{\leq i}_+, N^{\leq i}_-$: Scan from left to right, counting positive/negative labels.
-    \end{itemize}
-    Each quantity is updated in $O(1)$ per position, giving total $O(n)$ time.
+%     Additionally, if $y_{i+1}=-1$, two new vertices appear in the region $\le i+1$, namely $x'_{i+1}$ and $x_{i+1}$. Their contribution to $d^{\le i+1}_-$ is
+%     \[
+%         d(x'_{i+1}, x'_{i+2}) + d(x_{i+1}, x'_{i+2})
+%         = d(x'_{i+1}, x'_{i+2}) + \big( d(x_{i+1}, x'_{i+1}) + d(x'_{i+1}, x'_{i+2}) \big)
+%         = 2\,d(x'_{i+1}, x'_{i+2}) + d(x_{i+1}, x'_{i+1}).
+%     \]
+%     Combining both parts, we obtain the update formulas for the two cases based on the label $y_{i+1}$:
+%     \begin{align*}
+%         N^{\le i+1}_- &= \begin{cases}
+%             N^{\le i}_- + 2, & \text{if } y_{i+1}=-1,\\
+%             N^{\le i}_-, & \text{if } y_{i+1}=+1,
+%         \end{cases}\\[4pt]
+%         d^{\le i+1}_- &= \begin{cases}
+%             d^{\le i}_- + N^{\le i}_-\, d(x'_{i+1}, x'_{i+2}) + 2\,d(x'_{i+1}, x'_{i+2}) + d(x_{i+1}, x'_{i+1}), & \text{if } y_{i+1}=-1,\\
+%             d^{\le i}_- + N^{\le i}_-\, d(x'_{i+1}, x'_{i+2}), & \text{if } y_{i+1}=+1.
+%         \end{cases}
+%     \end{align*}
+%     Clearly, each update step only uses quantities known at step $i$ and distances between consecutive spine points, so it can be performed in constant time. Therefore, knowing $N^{\le i}_-$ and $d^{\le i}_-$ is sufficient to update $N^{\le i+1}_-$ and $d^{\le i+1}_-$.
+% \end{proof}
 
-    \textit{Step 2: Computing all distance quantities in $O(n)$.}
-    This is where we apply the dynamic programming approach described above. The key insight is that our augmented tree has a spine structure, which allows efficient re-rooting operations. % [LE: Replaced XXX with specific reference to DP approach]
+% Extending above proposition, we obtain the following result.
+% \begin{proposition}\remLE{This}
+%     We can compute the noise loss values $f(x'_i, x'_{i+1})$ for all $i=1,\ldots, n-1$ in $O(n)$.
+%     % \begin{enumerate}
+%     %     \item $(N^{>i}_+, N^{>i}_-, N^{\leq i}_+, N^{\leq i}_-)$ for all $i=1,\ldots, n-1$ % [LE: Fixed ellipsis]
+%     %     \item $(d^{>i}_+, d^{>i}_-, d^{\leq i}_+, d^{\leq i}_-)$ for all $i=1,\ldots, n-1$ % [LE: Fixed ellipsis]
+%     %     \item $f(x'_i, x'_{i+1})$ for all $i=1,\ldots, n-1$. % [LE: Fixed ellipsis]
+%     % \end{enumerate}
+% \end{proposition}
+% \begin{proof}
+    
+%     We prove this by applying Proposition 5.1 systematically, using the dynamic programming technique on trees. % [LE: Fixed XXX reference to specific proposition about constant-time updates]
 
-    Left-to-right pass for computing $d^{\leq i}_+, d^{\leq i}_-$: % [LE: Verified indices are correct for progressive accumulation]
-    \begin{itemize}
-        \item Initialize: $d^{\leq 1}_+ = 2d(x'_1, x'_2) + d(x_1, x'_2)$ if $y_1 = +1$, else $0$.
-        \item For $i = 1, \ldots, n-2$: Apply Proposition 1 (and its symmetric version for positive labels) to update $d^{\leq i+1}_\pm$ from $d^{\leq i}_\pm$ in $O(1)$ time.
-    \end{itemize}
+%     \textit{Step 1: Computing all counting quantities in $O(n)$.}
+%     The counting quantities can be computed by simple linear scans:
+%     \begin{itemize}
+%         \item $N^{>i}_+, N^{>i}_-$: Scan from right to left, counting positive/negative labels.
+%         \item $N^{\leq i}_+, N^{\leq i}_-$: Scan from left to right, counting positive/negative labels.
+%     \end{itemize}
+%     Each quantity is updated in $O(1)$ per position, giving total $O(n)$ time.
 
-    Right-to-left pass for computing $d^{>i}_+, d^{>i}_-$:
-    \begin{itemize}
-        \item Initialize: $d^{>n-1}_+ = 0, d^{>n-1}_- = 0$ (no points beyond position $n-1$).
-        \item For $i = n-1, n-2, \ldots, 2$: Use the symmetric update formula to compute $d^{>(i-1)}_\pm$ from $d^{>i}_\pm$ in $O(1)$ time.
-    \end{itemize}
+%     \textit{Step 2: Computing all distance quantities in $O(n)$.}
+%     This is where we apply the dynamic programming approach described above. The key insight is that our augmented tree has a spine structure, which allows efficient re-rooting operations. % [LE: Replaced XXX with specific reference to DP approach]
 
-    The symmetric update formula for the right-to-left pass is obtained by reversing the roles: when moving from anchor $x'_{i+1}$ to $x'_i$, all points $j > i$ have their distances increased by $d(x'_i, x'_{i+1})$, and if $y_i = -1$, we add the contribution of the new point $i$.
+%     Left-to-right pass for computing $d^{\leq i}_+, d^{\leq i}_-$: % [LE: Verified indices are correct for progressive accumulation]
+%     \begin{itemize}
+%         \item Initialize: $d^{\leq 1}_+ = 2d(x'_1, x'_2) + d(x_1, x'_2)$ if $y_1 = +1$, else $0$.
+%         \item For $i = 1, \ldots, n-2$: Apply Proposition 1 (and its symmetric version for positive labels) to update $d^{\leq i+1}_\pm$ from $d^{\leq i}_\pm$ in $O(1)$ time.
+%     \end{itemize}
 
-    \textit{Step 3: Computing $f(x'_i, x'_{i+1})$ in $O(n)$.}
-    Once all counting and distance quantities are computed, we can evaluate $f(x'_i, x'_{i+1})$ for each $i = 1, \ldots, n-1$ using the formulas given in the preprocessing section. % [LE: Replaced XXX with specific section reference]
-    % \begin{itemize}
-    %     \item If $y_i = -1, y_{i+1} = +1$: $f(x'_i, x'_{i+1}) = d^{>i}_- + d^{\leq i}_+$.
-    %     \item If $y_i = +1, y_{i+1} = -1$: $f(x'_i, x'_{i+1}) = d^{>i}_+ + d^{\leq i}_-$.
-    % \end{itemize}
-    Each evaluation takes $O(1)$ time, giving total $O(n)$ time.
+%     Right-to-left pass for computing $d^{>i}_+, d^{>i}_-$:
+%     \begin{itemize}
+%         \item Initialize: $d^{>n-1}_+ = 0, d^{>n-1}_- = 0$ (no points beyond position $n-1$).
+%         \item For $i = n-1, n-2, \ldots, 2$: Use the symmetric update formula to compute $d^{>(i-1)}_\pm$ from $d^{>i}_\pm$ in $O(1)$ time.
+%     \end{itemize}
 
-    % \textbf{Conclusion:} By Proposition 5.3 (dynamic programming on trees), the re-rooting operations along the spine can be performed efficiently. Since each of the three steps requires $O(n)$ time, the total time complexity is $O(n)$.
-\end{proof}
+%     The symmetric update formula for the right-to-left pass is obtained by reversing the roles: when moving from anchor $x'_{i+1}$ to $x'_i$, all points $j > i$ have their distances increased by $d(x'_i, x'_{i+1})$, and if $y_i = -1$, we add the contribution of the new point $i$.
+
+%     \textit{Step 3: Computing $f(x'_i, x'_{i+1})$ in $O(n)$.}
+%     Once all counting and distance quantities are computed, we can evaluate $f(x'_i, x'_{i+1})$ for each $i = 1, \ldots, n-1$ using the formulas given in the preprocessing section. % [LE: Replaced XXX with specific section reference]
+%     % \begin{itemize}
+%     %     \item If $y_i = -1, y_{i+1} = +1$: $f(x'_i, x'_{i+1}) = d^{>i}_- + d^{\leq i}_+$.
+%     %     \item If $y_i = +1, y_{i+1} = -1$: $f(x'_i, x'_{i+1}) = d^{>i}_+ + d^{\leq i}_-$.
+%     % \end{itemize}
+%     Each evaluation takes $O(1)$ time, giving total $O(n)$ time.
+
+%     % \textbf{Conclusion:} By Proposition 5.3 (dynamic programming on trees), the re-rooting operations along the spine can be performed efficiently. Since each of the three steps requires $O(n)$ time, the total time complexity is $O(n)$.
+% \end{proof}
 
 
 
@@ -576,7 +584,7 @@ Extending above proposition, we obtain the following result.
 
 % Since our augmented tree has a spine-and-spoke structure (essentially a path with leaves), all tree traversals can be performed in linear time.
 
-\subsubsection{Algorithm and Complexity Analysis}
+% \subsubsection{Algorithm and Complexity Analysis}
 
 
 \begin{algorithm}[htbp]
