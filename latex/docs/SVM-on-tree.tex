@@ -194,28 +194,24 @@ These quantities can be computed in linear time using dynamic programming.
     The $20$ quantities for all index $i=1,..., n$ can be computed in $O(n)$.
 \end{proposition}
 \begin{proof}
-    We use DFS-based dynamic programming on tree to efficiently compute these quantities.
+    We prove this by showing that all quantities can be computed using a single DFS traversal on the tree.
 
-    \textbf{Algorithm:} For each index $i$, we perform DFS traversal from node $i$ as root:
+    Consider the tree structure where each data point $x_i$ is connected to its projection $x'_i$ on the spine. For any node $v$ in the tree, let $subtree(v)$ denote the subtree rooted at $v$. We define:
+    $$sz_+(v) = |\{j \in subtree(v): y_j = +1\}|, \quad sz_-(v) = |\{j \in subtree(v): y_j = -1\}|$$
+    $$dist_+(v) = \sum_{j \in subtree(v), y_j=+1} d(x_j, x'_j), \quad dist_-(v) = \sum_{j \in subtree(v), y_j=-1} d(x_j, x'_j)$$
 
-    \textbf{Step 1:} \texttt{dfs\_sz()} computes subtree sizes:
-    For each subtree rooted at $v$, compute $sz1[v] = |\{j \in subtree(v): y_j = +1\}|$ and $sz2[v] = |\{j \in subtree(v): y_j = -1\}|$
+    These quantities satisfy the recurrence relations:
+    $$sz_\pm(v) = \mathbf{1}_{y_v = \pm 1} + \sum_{u \in children(v)} sz_\pm(u)$$
+    $$dist_\pm(v) = \mathbf{1}_{y_v = \pm 1} \cdot d(x_v, x'_v) + \sum_{u \in children(v)} [dist_\pm(u) + sz_\pm(u) \cdot weight(v,u)]$$
 
-    \textbf{Step 2:} \texttt{dfs()} computes accumulated distances:
-    For each node $v$, compute $dis\_s[v] = \sum_{j \in subtree(v), y_j=+1} d(x_j, x'_j)$ and $dis\_p[v] = \sum_{j \in subtree(v), y_j=-1} d(x_j, x'_j)$
+    Now, for each index $i$ corresponding to projection $x'_i$ on the spine, the quantities $d^{\sim i}_\pm$ and $N^{\sim i}_\pm$ can be extracted directly from the DFS computation:
+    $$N^{< i}_\pm = 2 \cdot sz_\pm(left\_subtree(i)), \quad N^{> i}_\pm = 2 \cdot sz_\pm(right\_subtree(i))$$
+    $$d^{< i}_\pm = dist_\pm(left\_subtree(i)), \quad d^{> i}_\pm = dist_\pm(right\_subtree(i))$$
+    $$N^{= i}_\pm = 2\mathbf{1}_{y_i = \pm 1}, \quad d^{= i}_\pm = \mathbf{1}_{y_i = \pm 1} \cdot d(x_i, x'_i)$$
 
-    \textbf{Step 3:} Extract required quantities:
-    $N^{< i}_+ = 2 \cdot sz1[left\_subtree(i)]$, $N^{< i}_- = 2 \cdot sz2[left\_subtree(i)]$
-    $N^{> i}_+ = 2 \cdot sz1[right\_subtree(i)]$, $N^{> i}_- = 2 \cdot sz2[right\_subtree(i)]$
-    $d^{< i}_+ = dis\_s[left\_subtree(i)]$, $d^{< i}_- = dis\_p[left\_subtree(i)]$
-    $d^{> i}_+ = dis\_s[right\_subtree(i)]$, $d^{> i}_- = dis\_p[right\_subtree(i)]$
+    For relations $\leq$ and $\geq$, we have $d^{\leq i}_\pm = d^{< i}_\pm + d^{= i}_\pm$ and $N^{\leq i}_\pm = N^{< i}_\pm + N^{= i}_\pm$, and similarly for $\geq$.
 
-    Relations $\leq$ and $\geq$ are computed by combining $<$, $=$, and $>$ results.
-
-    \textbf{Complexity:} Each DFS takes $O(n)$ time. We perform DFS for each of the $n$ nodes, but by carefully organizing the computation and using the tree structure, we can compute all 20 quantities for all indices in total $O(n)$ time through a single traversal with appropriate bookkeeping.
-
-    This matches the implementation in \texttt{compute\_loss()} function which efficiently computes $sz1, sz2, dis\_s, dis\_p$ arrays in one DFS pass.
-\end{proof}
+    Since the DFS traversal computes $sz_\pm$ and $dist_\pm$ for all nodes in $O(n)$ time, and extracting all 20 quantities for all indices requires only $O(1)$ operations per index, the total complexity is $O(n)$.\end{proof}
 
 
 As a result, we have 
