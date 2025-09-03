@@ -194,21 +194,33 @@ These quantities can be computed in linear time using dynamic programming.
     The $20$ quantities for all index $i=1,..., n$ can be computed in $O(n)$.
 \end{proposition}
 \begin{proof}
-    We use dynamic programming to efficiently compute these quantities.
+    We use dynamic programming on tree to efficiently compute these quantities.
 
     \textbf{Step 1:} Sort the projected points $x'_1, x'_2, \ldots, x'_n$ in order along the spine.
 
-    \textbf{Step 2:} For each relation $\sim \in \{<, =, >, \leq, \geq\}$, we compute using recurrence relations:
+    \textbf{Step 2:} For each relation $\sim \in \{<, =, >, \leq, \geq\}$, compute both $d^{\sim i}_\pm$ and $N^{\sim i}_\pm$:
 
-    For relation "$<$": $d^{< i}_+ = d^{< (i-1)}_+ + \mathbf{1}_{y_{i-1}=+1} \cdot [d(x'_{i-1}, x'_i) + d(x_{i-1}, x'_i)]$
+    \textbf{For relation "$<$":} For $i$ from 1 to $n$:
+    $d^{< i}_+ = d^{< (i-1)}_+ + \mathbf{1}_{y_{i-1}=+1} \cdot [d(x'_{i-1}, x'_i) + d(x_{i-1}, x'_i)]$
+    $d^{< i}_- = d^{< (i-1)}_- + \mathbf{1}_{y_{i-1}=-1} \cdot [d(x'_{i-1}, x'_i) + d(x_{i-1}, x'_i)]$
+    $N^{< i}_+ = N^{< (i-1)}_+ + 2\mathbf{1}_{y_{i-1}=+1}$
+    $N^{< i}_- = N^{< (i-1)}_- + 2\mathbf{1}_{y_{i-1}=-1}$
 
-    For relation "$>$": $d^{> i}_+ = d^{> (i+1)}_+ + \mathbf{1}_{y_{i+1}=+1} \cdot [d(x'_{i+1}, x'_i) + d(x_{i+1}, x'_i)]$
+    \textbf{For relation "$>$":} For $i$ from $n$ to 1:
+    $d^{> i}_+ = d^{> (i+1)}_+ + \mathbf{1}_{y_{i+1}=+1} \cdot [d(x'_{i+1}, x'_i) + d(x_{i+1}, x'_i)]$
+    $d^{> i}_- = d^{> (i+1)}_- + \mathbf{1}_{y_{i+1}=-1} \cdot [d(x'_{i+1}, x'_i) + d(x_{i+1}, x'_i)]$
+    $N^{> i}_+ = N^{> (i+1)}_+ + 2\mathbf{1}_{y_{i+1}=+1}$
+    $N^{> i}_- = N^{> (i+1)}_- + 2\mathbf{1}_{y_{i+1}=-1}$
 
-    For relation "$=$": $d^{= i}_\pm = d(x_i, x'_i)$ if $y_i = \pm 1$, otherwise $0$
+    \textbf{For relation "$=$":}
+    $d^{= i}_\pm = d(x_i, x'_i)$ if $y_i = \pm 1$, otherwise $0$
+    $N^{= i}_\pm = 2$ if $y_i = \pm 1$, otherwise $0$
 
-    For relations "$\leq$" and "$\geq$": $d^{\leq i}_\pm = d^{< i}_\pm + d^{= i}_\pm$
+    \textbf{For relations "$\leq$" and "$\geq$":}
+    $d^{\leq i}_\pm = d^{< i}_\pm + d^{= i}_\pm$, $N^{\leq i}_\pm = N^{< i}_\pm + N^{= i}_\pm$
+    $d^{\geq i}_\pm = d^{> i}_\pm + d^{= i}_\pm$, $N^{\geq i}_\pm = N^{> i}_\pm + N^{= i}_\pm$
 
-    \textbf{Step 3:} Each update takes $O(1)$ time. Total complexity: $O(5n) = O(n)$.
+    \textbf{Step 3:} Each update takes $O(1)$ time for both $d$ and $N$ quantities. We have $n$ points and 5 relations, each with 4 quantities ($d^{\sim i}_+, d^{\sim i}_-, N^{\sim i}_+, N^{\sim i}_-$), giving total complexity $O(20n) = O(n)$.
 \end{proof}
 
 
