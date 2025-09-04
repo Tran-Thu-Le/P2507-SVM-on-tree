@@ -183,30 +183,79 @@ By definition of SVM model on tree, the naive training approach for  such a mode
 In the following, we will significantly reduce this complexity to $O(n^2)$.
 
 
-For each index $i$, let us define $20$ quantities corresponding to five relations $\sim$ in $\{<, =, >, \leq, \geq\}$ \remLE{need meaning of them}
+For each index $i$, let us define $20$ quantities corresponding to five relations $\sim_i$ in $\{<_i, =_i, >_i, \leq_i, \geq_i\}$, where these relations describe the relative position of node indices with respect to index $i$ on the sorted spine:
 \begin{align*}
-    d^{\sim i}_\pm & = \sum_{j \sim i, y_j=\pm 1} d(x'_j, x'_i) + d(x_j, x'_i),\\
-    N^{\sim i}_\pm & = 2 |\{j \in \{1,..., n\}: j \sim i \text{ and } y_j=\pm 1\}|
+    d^{\sim_i}_\pm & = \sum_{j \sim_i i, y_j=\pm 1} [d(x'_j, x'_i) + d(x_j, x'_i)],\\
+    N^{\sim_i}_\pm & = 2 |\{j \in \{1,\ldots, n\}: j \sim_i i \text{ and } y_j=\pm 1\}|
 \end{align*}
 
-These quantities can be computed in linear time using dynamic programming.
+Here, $j <_i i$ means $j < i$, $j =_i i$ means $j = i$, $j >_i i$ means $j > i$, and similarly for $\leq_i$ and $\geq_i$.
+
+These quantities can be computed in linear time using dynamic programming on the tree structure.
+
 \begin{proposition}
-    The $20$ quantities for all index $i=1,..., n$ can be computed in $O(n)$.
+    The $20$ quantities $\{d^{\sim_i}_\pm, N^{\sim_i}_\pm\}$ for all index $i=1,\ldots, n$ and all relations $\sim_i \in \{<_i, =_i, >_i, \leq_i, \geq_i\}$ can be computed in $O(n)$.
 \end{proposition}
 \begin{proof}
-    We prove this by showing that all quantities can be computed using dynamic programming on the tree structure.
+    We prove this by showing that all quantities can be computed using dynamic programming on the augmented tree structure with spine-and-spoke topology.
 
-    Consider the tree where each data point $x_i$ is connected to its projection $x'_i$ on the spine. The key insight is that for each index $i$, the quantities $d^{\sim i}_\pm$ and $N^{\sim i}_\pm$ can be computed by analyzing the subtree structure around node $i$.
+    The key insight is that the spine creates a linear ordering of projections $x'_1, \ldots, x'_n$, and each relation $\sim_i$ partitions the nodes into regions that can be processed incrementally.
 
-    For relation "$<$": The quantities $d^{< i}_\pm$ and $N^{< i}_\pm$ represent the accumulated distances and counts from all nodes $j$ with $j < i$. These can be computed by a single traversal of the left subtree rooted at $i$, where:
-    $$d^{< i}_\pm = \sum_{j < i, y_j = \pm 1} [d(x'_j, x'_i) + d(x_j, x'_i)]$$
-    $$N^{< i}_\pm = 2|\{j < i: y_j = \pm 1\}|$$
+    \textbf{Base case - Relation $=_i$:} For each $i$, we have:
+    \begin{align*}
+        d^{=_i}_\pm &= \begin{cases} 
+            d(x_i, x'_i) & \text{if } y_i = \pm 1 \\
+            0 & \text{otherwise}
+        \end{cases}\\
+        N^{=_i}_\pm &= \begin{cases} 
+            2 & \text{if } y_i = \pm 1 \\
+            0 & \text{otherwise}
+        \end{cases}
+    \end{align*}
+    These are computed in $O(1)$ per index, giving $O(n)$ total.
 
-    For relation "$>$": Similarly, $d^{> i}_\pm$ and $N^{> i}_\pm$ are computed by traversing the right subtree.
+    \textbf{Left-to-right scan - Relations $<_i$ and $\leq_i$:} 
+    We compute $d^{<_i}_\pm$ and $N^{<_i}_\pm$ using dynamic programming. For $i = 2, \ldots, n$:
+    \begin{align*}
+        d^{<_i}_+ &= d^{<_{i-1}}_+ + d^{=_{i-1}}_+ + N^{<_i}_+ \cdot d(x'_{i-1}, x'_i)\\
+        d^{<_i}_- &= d^{<_{i-1}}_- + d^{=_{i-1}}_- + N^{<_i}_- \cdot d(x'_{i-1}, x'_i)\\
+        N^{<_i}_+ &= N^{<_{i-1}}_+ + N^{=_{i-1}}_+\\
+        N^{<_i}_- &= N^{<_{i-1}}_- + N^{=_{i-1}}_-
+    \end{align*}
+    
+    Note that $N^{<_i}_\pm = N^{<_{i-1}}_\pm + N^{=_{i-1}}_\pm$ because both count nodes with indices in $\{1, 2, \ldots, i-1\}$.
+    
+    \textbf{Explanation of the update formula:} We are computing distances from all nodes $j < i$ to anchor $x'_i$. This includes:
+    \begin{itemize}
+        \item \textbf{Nodes $j < i-1$:} Their distances to $x'_{i-1}$ are in $d^{<_{i-1}}_\pm$, and need adjustment $+d(x'_{i-1}, x'_i)$ per node
+        \item \textbf{Node $j = i-1$:} Its distance to $x'_{i-1}$ is in $d^{=_{i-1}}_\pm$, and needs adjustment $+d(x'_{i-1}, x'_i)$ 
+    \end{itemize}
+    
+    The total adjustment is $N^{<_i}_\pm \cdot d(x'_{i-1}, x'_i)$ because we adjust distances for all $N^{<_i}_\pm$ nodes with indices $j < i$.
+    
+    \textbf{Concrete example:} Consider computing $d^{<_3}_+$ (distances from positive nodes $j < 3$ to anchor $x'_3$):
+    \begin{itemize}
+        \item $d^{<_2}_+$: distances from positive nodes $j < 2$ (i.e., $j = 1$) to anchor $x'_2$ 
+        \item $d^{=_2}_+$: distance from node $j = 2$ to anchor $x'_2$ (if positive)
+        \item When moving anchor from $x'_2$ to $x'_3$, \textbf{all} nodes with $j < 3$ (i.e., $j \in \{1,2\}$) need distance adjustment $+d(x'_2, x'_3)$
+        \item This is exactly $N^{<_3}_+ = N^{<_2}_+ + N^{=_2}_+$ nodes that need adjustment
+    \end{itemize}
+    
+    Then $d^{\leq_i}_\pm = d^{<_i}_\pm + d^{=_i}_\pm$ and $N^{\leq_i}_\pm = N^{<_i}_\pm + N^{=_i}_\pm$.
 
-    For relation "$=$": We have $d^{= i}_\pm = d(x_i, x'_i)$ if $y_i = \pm 1$, otherwise $0$, and $N^{= i}_\pm = 2$ if $y_i = \pm 1$, otherwise $0$.
+    \textbf{Right-to-left scan - Relations $>_i$ and $\geq_i$:}
+    Similarly, we compute $d^{>_i}_\pm$ and $N^{>_i}_\pm$ by scanning from right to left. For $i = n-1, n-2, \ldots, 1$:
+    \begin{align*}
+        d^{>_i}_+ &= d^{>_{i+1}}_+ + d^{=_{i+1}}_+ + N^{>_i}_+ \cdot d(x'_i, x'_{i+1})\\
+        d^{>_i}_- &= d^{>_{i+1}}_- + d^{=_{i+1}}_- + N^{>_i}_- \cdot d(x'_i, x'_{i+1})\\
+        N^{>_i}_+ &= N^{>_{i+1}}_+ + N^{=_{i+1}}_+\\
+        N^{>_i}_- &= N^{>_{i+1}}_- + N^{=_{i+1}}_-
+    \end{align*}
+    
+    Then $d^{\geq_i}_\pm = d^{>_i}_\pm + d^{=_i}_\pm$ and $N^{\geq_i}_\pm = N^{>_i}_\pm + N^{=_i}_\pm$.
 
-    For relations "$\leq$" and "$\geq$": These are computed as $d^{\leq i}_\pm = d^{< i}_\pm + d^{= i}_\pm$ and $N^{\leq i}_\pm = N^{< i}_\pm + N^{= i}_\pm$, and similarly for "$\geq$".
+    Each update step requires $O(1)$ operations, and we perform $O(n)$ updates for each relation and label combination. Therefore, the total complexity is $O(n)$.
+\end{proof}
 
 
 
@@ -215,30 +264,72 @@ As a result, we have
     For any $\lambda\geq 0$ and $u, v\in V$, we have $d(u, v)$, $f(u, v)$ and $L_\lambda(u, v)$ can be computed in $O(n^2)$.
 \end{proposition}
 \begin{proof}
+    \textbf{Distance computation:} For the spine-spoke tree structure, distances between any two points can be computed in $O(1)$ time using path decomposition. For any two points $x_i$ and $x_j$, we compute:
+    $$d(x_i, x_j) = d(x_i, x'_i) + d(x'_i, x'_j) + d(x'_j, x_j)$$
+    where $x'_i$ and $x'_j$ are their respective projections onto the spine. All three components can be computed using Euclidean distance in constant time. Since there are $O(n^2)$ pairs of points, computing all pairwise distances takes $O(n^2)$ time.
+
+    \textbf{Noise function computation:} The main challenge is computing all noise functions $f(u, v)$ efficiently.
+
+    For any support pair $(u, v)$ with $u \in V_+$ and $v \in V_-$, the noise function is:
+    $$f(u, v) = f_+(u, v) + f_-(v, u)$$
+    where 
+    \begin{align*}
+        f_+(u, v) &= \sum_{z \in V_+(u,v)} d(z, u)\\
+        f_-(v, u) &= \sum_{z \in V_-(v,u)} d(z, v)
+    \end{align*}
+
+    Here, $V_+(u,v)$ is the set of positive vertices in the subtree rooted at $u$ that contains $v$, and $V_-(v,u)$ is the set of negative vertices in the subtree rooted at $v$ that contains $u$.
+
+    \textbf{Key insight for spine-spoke trees:} The computation depends on whether nodes are on the spine or in spoke subtrees.
+
+    \textbf{Case 1: $u$ is off-spine (spoke node):} 
+    When $u$ projects to spine position $i_u$ but $u \neq x'_{i_u}$, all positive nodes except $u$ are in the subtree containing $v$. Thus:
+    $$f_+(u, v) = \sum_{z \in V_+ \setminus \{u\}} d(z, u)$$
     
+    This can be computed in $O(1)$ using precomputed quantities:
+    $$f_+(u, v) = d^{<_{i_u}}_+ + d^{>_{i_u}}_+ + (N_+ - 1) \cdot d(u, x'_{i_u})$$
+    
+    \textbf{Case 2: $u$ is on-spine:} 
+    When $u = x'_{i_u}$, the computation depends on the relative position of $v$'s projection $i_v$:
+    \begin{align*}
+        f_+(u, v) &= \begin{cases}
+            d^{>_{i_u}}_+ & \text{if } i_v > i_u \text{ (v projects after u, use positive nodes after u)}\\
+            d^{<_{i_u}}_+ & \text{if } i_v < i_u \text{ (v projects before u, use positive nodes before u)}
+        \end{cases}
+    \end{align*}
 
-    It is well known that $d(u, v)$ will be computed in $O(n^2)$. If $f(u, v)$ can also be computed in $O(n^2)$, then we know all $L_\lambda(u, v)$. In the remaining of the proof, we focus on the cumputation of $f(u, v)$.
+    \textbf{Symmetric analysis for $f_-(v,u)$:} Similar logic applies with roles reversed.
 
+    \textbf{Case 3: Both on spine ($u = x'_i$, $v = x'_j$ with $i \neq j$):}
+    Without loss of generality, assume $i < j$:
+    \begin{align*}
+        f_+(x'_i, x'_j) &= d^{>_i}_+ \quad \text{(positive nodes after } x'_i\text{, in subtree containing } x'_j\text{)}\\
+        f_-(x'_j, x'_i) &= d^{<_j}_- \quad \text{(negative nodes before } x'_j\text{, in subtree containing } x'_i\text{)}\\
+        f(x'_i, x'_j) &= d^{>_i}_+ + d^{<_j}_-
+    \end{align*}
 
-    It is well known that $d(u, v)$ can be computed in $O(n^2)$ using standard tree algorithms. For $f(u, v)$, we use the 20 precomputed quantities from Proposition 1.
+    Since each $f(u,v)$ computation uses precomputed values from Proposition 1 in $O(1)$ time, and there are $O(n^2)$ pairs to consider, the total complexity for computing all noise functions is $O(n^2)$.
 
-    Given support nodes $u$ and $v$, the noise function is:
-    $f(u, v) = \sum_{j \in V_-(u,v)} [d(x_j, x'_j) + d(x'_j, u) + d(x'_j, v)]$
-
-    Let $i_u$ and $i_v$ be the indices corresponding to positions of $u$ and $v$ on the spine. Using our precomputed quantities:
-    $f(u, v) = \sum_{\sim \in \{<,=,>\}} [d^{\sim i_u}_- + d^{\sim i_v}_-]$ where the summation is taken over appropriate ranges.
-
-    Since each $f(u,v)$ computation uses precomputed values in $O(1)$ time, and there are $O(n^2)$ pairs, the total complexity is $O(n^2)$.
-
-    Therefore, $L_\lambda(u,v) = f(u,v) - \lambda d(u,v)$ can be computed in $O(n^2)$ for all pairs.
+    Therefore, $L_\lambda(u,v) = f(u,v) - \lambda d(u,v)$ can be computed for all pairs in $O(n^2)$ time.
 \end{proof}
 
 The key insight is that we can compute the total loss function $L_\lambda(u, v) = f(u, v) - \lambda d(u, v)$ in $O(n^2)$. This can be achieved by a preprocessing step in which we all compute $f(u, v)$ and $d(u, v)$ in $O(n^2)$ for any pair of vertices $(u, v)$.  
 It is well-known that the distance matrix on tree can be computed in $O(n^2)$ time. The main technicality here is to compute all the noise functions $f(u, v)$ in $O(n^2)$ time. 
 
 \begin{theorem}
-    For any $\lambda \geq 0$, we can find the support nodes in $O(n^2)$.
+    For any $\lambda \geq 0$, we can find the optimal support pair in $O(n^2)$ time.
 \end{theorem}
+\begin{proof}
+    The algorithm consists of two phases:
+    
+    \textbf{Phase 1: Preprocessing ($O(n)$ time)} - By Proposition 1, we compute all quantities $\{d^{\sim_i}_\pm, N^{\sim_i}_\pm\}$ in $O(n)$ total time using dynamic programming.
+    
+    \textbf{Phase 2: Evaluation ($O(n^2)$ time)} - For each of the $O(n^2)$ possible support pairs $(u,v)$, we compute $L_\lambda(u,v) = f(u,v) - \lambda d(u,v)$ in $O(1)$ time using the precomputed quantities from Proposition 2.
+    
+    Since tree distances $d(u,v)$ can be computed for all pairs in $O(n^2)$ time using standard techniques, and noise functions $f(u,v)$ can be computed for all pairs in $O(n^2)$ time using our preprocessing, the total complexity is $O(n^2)$.
+    
+    The optimal support pair is simply $\arg\min_{u,v} L_\lambda(u,v)$ over all computed pairs.
+\end{proof}
 
 
 \subsection{Training SVM model on tree with unit parameter}
@@ -454,7 +545,46 @@ In this section, we focus on the  design of an efficient algorithm for training 
 \subsubsection{Preprocessing} 
 \label{sec:preprocessing} % [LE: Added section label for reference] 
 
-Recall $x'_1, \ldots,x'_n$ are projections of $x_1,\ldots, x_n$ and we assume that $x'_1, \ldots,x'_n$ have been sorted in a certain order, \eg by their first coordinates. By the adjacency property (Theorem~\ref{thm:adjacency}), we know that support vectors form a pair $(x'_i, x'_{i+1})$ with opposite signs. By previous section, we know that $f(x'_i, x'_{i+1})$ and, thus, $L_1(x'_i, x'_{i+1})$ can be precomputed in $O(n)$.
+Recall $x'_1, \ldots,x'_n$ are projections of $x_1,\ldots, x_n$ and we assume that $x'_1, \ldots,x'_n$ have been sorted in a certain order, \eg by their first coordinates. By the adjacency property (Theorem~\ref{thm:adjacency}), we know that support vectors form a pair $(x'_i, x'_{i+1})$ with opposite signs. 
+
+For computing the noise function $f(x'_i, x'_{i+1})$ efficiently, we use the precomputed quantities from the arbitrary parameter case. Specifically, for adjacent pairs on the spine, the noise function can be expressed using our new notation:
+
+\begin{proposition}
+    For any adjacent pair $(x'_i, x'_{i+1})$ with $y_i \neq y_{i+1}$, the noise function $f(x'_i, x'_{i+1})$ can be computed in $O(1)$ time using the precomputed quantities $\{d^{\sim_j}_\pm, N^{\sim_j}_\pm\}$.
+\end{proposition}
+\begin{proof}
+    Consider adjacent nodes $x'_i$ and $x'_{i+1}$ on the spine. Without loss of generality, assume $y_i = +1$ and $y_{i+1} = -1$.
+
+    The noise function consists of two parts:
+    \begin{align*}
+        f(x'_i, x'_{i+1}) &= f_+(x'_i, x'_{i+1}) + f_-(x'_{i+1}, x'_i)
+    \end{align*}
+
+    For the positive noise part $f_+(x'_i, x'_{i+1})$, we need to sum distances from all positive nodes in the subtree rooted at $x'_i$ that contains $x'_{i+1}$, excluding $x'_i$ itself. Since $i < i+1$, this includes all positive nodes with indices $j >_i i$:
+    $$f_+(x'_i, x'_{i+1}) = d^{>_i}_+ $$
+
+    For the negative noise part $f_-(x'_{i+1}, x'_i)$, we need to sum distances from all negative nodes in the subtree rooted at $x'_{i+1}$ that contains $x'_i$, excluding $x'_{i+1}$ itself. Since $i+1 > i$, this includes all negative nodes with indices $j <_{i+1} (i+1)$:
+    $$f_-(x'_{i+1}, x'_i) = d^{<_{i+1}}_- $$
+
+    Therefore:
+    $$f(x'_i, x'_{i+1}) = d^{>_i}_+ + d^{<_{i+1}}_- $$
+
+    By symmetry, if $y_i = -1$ and $y_{i+1} = +1$, then:
+    $$f(x'_i, x'_{i+1}) = d^{>_i}_- + d^{<_{i+1}}_+ $$
+
+    Since all these quantities are precomputed in $O(n)$ total time by Proposition 1, each evaluation takes $O(1)$ time.
+\end{proof}
+
+\begin{proposition}
+    We can compute all noise loss values $f(x'_i, x'_{i+1})$ for adjacent pairs $i=1,\ldots, n-1$ in $O(n)$ total time.
+\end{proposition}
+\begin{proof}
+    By Proposition 1, all quantities $\{d^{\sim_j}_\pm, N^{\sim_j}_\pm\}$ are computed in $O(n)$ time.
+    
+    By the previous proposition, each $f(x'_i, x'_{i+1})$ evaluation takes $O(1)$ time using precomputed values.
+    
+    Since there are $O(n)$ adjacent pairs to consider, the total time for computing all noise functions is $O(n)$.
+\end{proof}
 
 
 % [LE: Fixed ellipsis and XXX reference] The margin is clearly $d(x'_i, x'_{i+1}) = \|x'_i - x'_{i+1}\|_2$.
