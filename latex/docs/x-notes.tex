@@ -1,5 +1,5 @@
 \section{Notes}
-\remLE{Please read this section first. This section will provide the main notations used in this paper. This section will be removed when we finish the project.}
+\remLE{This section provides the main notations used in this paper. This section will be removed when we finish the project.}
 
 
 
@@ -36,3 +36,18 @@ For the SVM model on tree $\tree$, we will use the following notations:
     \item The separating hyperplane is defined as the bisector of the optimal pair of support vectors.
 
 \end{enumerate}
+
+
+\section{Short Intro}
+
+\remLE{This section shows the main results and will be removed.}
+
+\begin{itemize}
+    \item SVM is important 
+    \item Solving it is time consuming
+    \item There are methods to accelerate the resolution 
+    \item First approach is to use multiple projections of data points onto 1D space, leading to an SVM on a path. See paper: Solving Linear SVMs with Multiple 1D Projections
+    \item Another reasearch direction is to used tree to approximate data points, but for solving Optimal Transport not SVM. See paper: Tree-Sliced Variants of Wasserstein Distances
+    \item In this paper, we propose a way to use tree to approximate data points for solving SVM 
+    \item After formulize the problem. We develope algorithms for solving the problem. The naive approach solve the problem in $O(n^3)$. We propose a dynamic method to reduce the complexity to $O(n^2)$. For unit parameter, we prove a theoretical property and solve the problem in $O(n \log n)$.
+\end{itemize}

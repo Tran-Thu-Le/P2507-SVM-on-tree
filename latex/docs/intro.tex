@@ -1,21 +1,25 @@
+
+
+
 \section{Introduction}
 
 Support Vector Machines (SVMs) have established themselves as one of the most powerful and theoretically well-founded approaches to machine learning since their introduction by Vapnik and colleagues in the 1990s. The fundamental principle of SVMs lies in finding an optimal separating hyperplane that maximizes the margin between different classes, providing both strong theoretical guarantees and excellent empirical performance across a wide range of applications. % [LE: Verified accuracy of SVM introduction]
 
 However, the computational complexity of classical SVMs becomes prohibitive for large-scale problems, as training typically requires $O(n^3)$ time for $n$ data points due to the quadratic programming formulation. This limitation has motivated extensive research into more efficient SVM variants and approximation methods. % [LE: Added complexity challenge with accurate complexity bound]
 
-To address these computational challenges, researchers have pursued several main directions. The first focuses on developing more efficient optimization algorithms, such as Sequential Minimal Optimization (SMO) and coordinate descent methods. The second exploits structural properties of optimal solutions through techniques like safe screening, which reduces problem size by identifying irrelevant variables. The third direction approximates data with simpler geometric structures like trees or graphs, then exploits these structures for efficient computation - examples include optimal transport on trees and SVM formulations on restricted geometric domains. % [LE: Replaced multiple comments with accurate research direction summary]
+To address these computational challenges, researchers have pursued several main directions. First approach is to use multiple projections of data points onto 1D space, leading to an SVM on a path. See paper: Solving Linear SVMs with Multiple 1D Projections. Another reasearch direction is to used tree to approximate data points, but for solving Optimal Transport not SVM. \remLE{Will be rewritten. Ngan will do this part.} %The first focuses on developing more efficient optimization algorithms, such as Sequential Minimal Optimization (SMO) and coordinate descent methods. The second exploits structural properties of optimal solutions through techniques like safe screening, which reduces problem size by identifying irrelevant variables. The third direction approximates data with simpler geometric structures like trees or graphs, then exploits these structures for efficient computation - examples include optimal transport on trees and SVM formulations on restricted geometric domains. % [LE: Replaced multiple comments with accurate research direction summary]
 
 
 
-This paper follows the third research direction. We introduce a novel SVM variant that operates directly on tree structures, which we call \emph{SVM on Tree}. Our approach constructs an augmented tree representation from the original data and formulates the classification problem as an optimization over support pairs within this tree structure. The key innovation lies in developing efficient algorithms that exploit the tree's geometric properties while maintaining the theoretical foundations of SVM optimization. % [LE: Fixed "WRONG" comment and clarified tree-based approach]
+We introduce a novel SVM variant that operates directly on tree structures, which we call \emph{SVM on Tree}. Our approach constructs an augmented tree representation from the original data and formulates the classification problem as an optimization over support pairs within this tree structure. The key innovation lies in developing efficient algorithms that exploit the tree's geometric properties while maintaining the theoretical foundations of SVM optimization. % [LE: Fixed "WRONG" comment and clarified tree-based approach]
 
 Our main contributions are:
 \begin{enumerate}
 \item A novel tree-based SVM formulation that constructs an augmented tree from input data and optimizes support vector selection within this structure.
-\item A theoretical analysis establishing the adjacency property, which dramatically reduces the computational complexity from $O(n^3)$ to $O(n)$ support pair candidates.
-\item An efficient algorithm with $O(nd + n\log n)$ time complexity that leverages dynamic programming techniques for objective function evaluation.
-\item Empirical validation demonstrating the effectiveness of our approach on datasets with inherent tree-like structures.
+\item Naive approach solve the problem in $O(n^3)$
+\item For arbitrary parameter $\lambda$, we develop a dynamic method compute the objective values for all pairs of support vectors in $O(n^2)$
+\item  For $lambda=1$, we develope a theoretical analysis establishing the adjacency property of, which dramatically reduces the computational complexity to $O(n\log n)$
+\item Empirical validation demonstrating the effectiveness (time and accuracy) of our approach on datasets with inherent tree-like structures.
 \end{enumerate}
 
 The remainder of this paper is organized as follows: Section~\ref{sec:classical_svm} reviews the foundations of classical SVM theory, Section~\ref{sec:svm_on_tree} presents our SVM on Tree methodology, Section~\ref{sec:experiments} provides experimental validation, and Section~\ref{sec:conclusion} concludes with directions for future work.
