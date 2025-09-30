@@ -1,39 +1,64 @@
 \section{Experiments}
 \label{sec:experiments}
 
-In this section, we evaluate the performance of our SVM on Tree method to validate our theoretical complexity analysis. Our experiments demonstrate the practical implications of the two algorithmic variants:
-
-\begin{itemize}
-\item \textbf{Unit parameter case ($\lambda = 1.0$):} Achieves $O(n)$ complexity due to the adjacency property, enabling linear-time optimization
-\item \textbf{Arbitrary parameter case ($\lambda \neq 1.0$):} Requires $O(n^2)$ complexity for exhaustive pair evaluation but still provides significant speedups over classical SVM
-\end{itemize}
-
-We compare our method against scikit-learn's SVC with RBF kernel on both synthetic and real-world datasets, measuring training time, prediction time, and classification accuracy.
-
-\begin{table}[htbp]
+\begin{figure}[htbp]
 \centering
-\caption{Performance comparison on synthetic datasets ($\lambda = 1.0$)}
-\label{tab:synthetic_results}
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-\textbf{N} & \textbf{Training Time (s)} & \textbf{Prediction Time (s)} & \textbf{Accuracy (\%)} & \textbf{Speedup} \\
-\textbf{(samples)} & \textbf{Tree / SVC} & \textbf{Tree / SVC} & \textbf{Tree / SVC} & \textbf{Train / Pred} \\
-\hline
-100 & 0.000078 / 0.000820 & 0.000114 / 0.001065 & 88.0 / 87.0 & 10.5x / 9.4x \\
-200 & 0.000088 / 0.001038 & 0.000072 / 0.002742 & 90.5 / 90.5 & 11.7x / 37.8x \\
-400 & 0.000165 / 0.002175 & 0.000085 / 0.009270 & 89.0 / 89.0 & 13.2x / 108.8x \\
-1000 & 0.000402 / 0.009031 & 0.000114 / 0.045735 & 89.1 / 88.4 & 22.5x / 401.2x \\
-2000 & 0.002271 / 0.138671 & 0.000289 / 0.649851 & 88.85 / 88.85 & 61.1x / 2249.6x \\
-5000 & 0.009452 / 0.908959 & 0.000618 / 4.074999 & 88.69 / 88.70 & 96.2x / 6595.8x \\
-\hline
-\end{tabular}
-\end{table}
+\includegraphics[width=0.85\textwidth]{data/images/benchmark_comparison_fixed.pdf}
+\caption{Performance comparison on synthetic datasets (Fair Comparison with LinearSVC). The plots show: (a) Training time comparison on log-log scale, (b) Prediction time comparison on log-log scale, (c) Classification accuracy across different dataset sizes with improved x-axis label spacing, and (d) Speedup ratios where values >1 indicate SVM On Tree is faster.}
+\label{fig:synthetic_results}
+\end{figure}
+
+% ======================================================
+% BACKUP DATA TABLE: Performance comparison results
+% (Kept for reference and potential future use)
+% ======================================================
+%
+% \begin{table}[htbp]
+% \centering
+% \caption{Performance comparison on synthetic datasets (Fair Comparison with LinearSVC)}
+% \label{tab:synthetic_results_backup}
+% \begin{tabular}{|c|c|c|c|c|}
+% \hline
+% \textbf{N} & \textbf{Training Time (s)} & \textbf{Prediction Time (s)} & \textbf{Accuracy (\%)} & \textbf{Speedup} \\
+% \textbf{(samples)} & \textbf{Tree / LinearSVC} & \textbf{Tree / LinearSVC} & \textbf{Tree / LinearSVC} & \textbf{Train / Pred} \\
+% \hline
+% 100 & 0.000106 / 0.001281 & 0.000121 / 0.000232 & 88.0 / 85.5 & 12.1x / 1.9x \\
+% 200 & 0.000174 / 0.001371 & 0.000125 / 0.000243 & 90.5 / 89.8 & 7.9x / 1.9x \\
+% 400 & 0.000340 / 0.001468 & 0.000146 / 0.000246 & 89.0 / 89.3 & 4.3x / 1.7x \\
+% 1000 & 0.000769 / 0.001642 & 0.000192 / 0.000257 & 89.1 / 88.4 & 2.1x / 1.3x \\
+% 2000 & 0.001623 / 0.002001 & 0.000280 / 0.000283 & 88.9 / 88.6 & 1.2x / 1.0x \\
+% 5000 & 0.004299 / 0.002991 & 0.000565 / 0.000346 & 88.8 / 88.8 & 0.7x / 0.6x \\
+% \hline
+% \end{tabular}
+% \end{table}
+%
+% Raw Data (for plotting and analysis) - Updated with latest benchmark results:
+% N = [100, 200, 400, 1000, 2000, 5000]
+% Training Time - SVM On Tree: [0.000060, 0.000107, 0.000207, 0.000788, 0.001738, 0.005647] (seconds)
+% Training Time - LinearSVC: [0.001331, 0.001456, 0.001503, 0.002033, 0.002651, 0.004976] (seconds)
+% Prediction Time - SVM On Tree: [0.000016, 0.000018, 0.000021, 0.000026, 0.000038, 0.000074] (seconds)  
+% Prediction Time - LinearSVC: [0.000241, 0.000244, 0.000259, 0.000276, 0.000323, 0.000469] (seconds)
+% Accuracy - SVM On Tree: [90.50, 89.00, 89.25, 88.85, 88.85, 88.69] (%)
+% Accuracy - LinearSVC: [89.75, 89.25, 89.12, 88.55, 88.89, 88.70] (%)
+% Training Speedup: [22.0x, 13.6x, 7.3x, 2.6x, 1.5x, 0.9x]
+% Prediction Speedup: [15.2x, 13.7x, 12.6x, 10.5x, 8.5x, 6.4x]
+%
+% PLOT GENERATION:
+% To regenerate the plots, run: python/plot_benchmark_results.py
+% This creates: data/images/benchmark_comparison.pdf (and individual plots)
+% 
+% BENCHMARK COMMAND:
+% cd python && PYTHONPATH="./src:$PYTHONPATH" python benchmark_svm_tree_vs_svc_2n.py --sizes 50 100 200 500 1000 2500 --repeats 5
+%
+% Note: These results are from fair comparison using LinearSVC (primal form)
+% instead of SVC (dual form) for scientific integrity.
+% ======================================================
 
 In this section, we evaluate the performance of our SVM on Tree method compared to the classical SVM implementation from scikit-learn. Our experiments demonstrate two key advantages: (1) significantly faster training and prediction times, and (2) comparable or better classification accuracy.
 
 \subsection{Experimental Setup}
 
-We implemented our SVM on Tree algorithm in C++ with Python bindings using pybind11 for efficient computation. The experiments compare our method against scikit-learn's SVC with RBF kernel on both synthetic and real-world datasets.
+We implemented our SVM on Tree algorithm in C++ with Python bindings using pybind11 for efficient computation. For fair comparison, the experiments compare our method against scikit-learn's LinearSVC (primal form) rather than SVC (dual form) to ensure both methods have comparable computational complexity O(d) for prediction.
 
 All experiments were conducted on synthetic parametric datasets with the following parameters:
 \begin{itemize}
@@ -43,109 +68,33 @@ All experiments were conducted on synthetic parametric datasets with the followi
 \item Correlation: $\rho = 0.0$
 \end{itemize}
 
-Each experiment was repeated 3 times and results were averaged to ensure statistical reliability.
+Each experiment was repeated 5 times and results were averaged to ensure statistical reliability.
 
-Our experimental evaluation follows a two-phase approach: First, we present results from our initial implementation with a fixed lambda parameter ($\lambda = 1.0$), which established the core effectiveness of the SVM on Tree method. Subsequently, we extended our implementation to support arbitrary lambda values and conducted comprehensive parameter analysis to demonstrate the flexibility and tunability of our approach.
+\textbf{Note on Fair Comparison}: Initially, we compared against scikit-learn's SVC, which uses dual form optimization and showed dramatic speedups (100-1000x). However, this comparison was unfair as SVC has O(\#support\_vectors × d) prediction complexity while our method has O(d). For scientific integrity, we compare against LinearSVC (primal form) which also has O(d) prediction complexity, providing a more meaningful and fair comparison.
 
 \subsection{Synthetic Dataset Results}
 
-\subsubsection{Unit Parameter Case ($\lambda = 1.0$)}
-
-Table~\ref{tab:synthetic_results} shows the performance comparison on synthetic datasets with $\lambda = 1.0$, demonstrating our theoretical $O(n)$ complexity in practice. The results show consistent speedups in both training and prediction phases while maintaining competitive accuracy.
-
-The linear complexity is evidenced by the training time scaling behavior: as dataset size increases from 100 to 5000 (50x increase), training time increases from 0.000078s to 0.009452s (approximately 121x increase), which is better than the $O(n^2)$ scaling that would show 2500x increase. This confirms the effectiveness of the adjacency property for the unit parameter case.
-
-\subsubsection{Arbitrary Parameter Case ($\lambda \neq 1.0$)}
-
-Building upon our unit parameter results, we extended our implementation to support arbitrary lambda values, which requires $O(n^2)$ complexity as no adjacency property holds. Table~\ref{tab:lambda_comparison} shows the performance comparison across different lambda values ($\lambda = 5.0, 10.0, 20.0, 30.0$) on synthetic datasets.
-
-The $O(n^2)$ complexity is reflected in the training time scaling: for $\lambda = 5.0$, as dataset size increases from 200 to 10000 (50x increase), training time increases from 0.000721s to 1.337285s (approximately 1855x increase), which is closer to quadratic scaling as expected when the adjacency property does not apply.
-
-\begin{table}[htbp]
-\centering
-\caption{Performance comparison across different lambda values on synthetic datasets}
-\label{tab:lambda_comparison}
-\begin{tabular}{|c|c|c|c|c|c|}
-\hline
-\textbf{Lambda} & \textbf{N} & \textbf{Training Time (s)} & \textbf{Prediction Time (s)} & \textbf{Accuracy (\%)} & \textbf{Speedup} \\
-\textbf{Value} & \textbf{(samples)} & \textbf{Tree / SVC} & \textbf{Tree / SVC} & \textbf{Tree / SVC} & \textbf{Train / Pred} \\
-\hline
-\multirow{6}{*}{5.0} & 100 & 0.000721 / 0.001718 & 0.000126 / 0.004093 & 90.5 / 90.5 & 2.38x / 32.60x \\
-& 200 & 0.002349 / 0.003440 & 0.000141 / 0.013088 & 89.0 / 89.0 & 1.46x / 93.12x \\
-& 400 & 0.008650 / 0.009497 & 0.000176 / 0.045511 & 89.25 / 89.44 & 1.10x / 259.32x \\
-& 1000 & 0.051930 / 0.054325 & 0.000299 / 0.277141 & 89.0 / 88.92 & 1.05x / 927.37x \\
-& 2000 & 0.206405 / 0.208046 & 0.000427 / 1.056877 & 88.82 / 88.85 & 1.01x / 2476.05x \\
-& 5000 & 1.337285 / 1.428290 & 0.000981 / 6.594770 & 88.66 / 88.70 & 1.07x / 6719.38x \\
-\hline
-\multirow{6}{*}{10.0} & 100 & 0.000679 / 0.001738 & 0.000124 / 0.004136 & 90.5 / 90.5 & 2.56x / 33.43x \\
-& 200 & 0.002418 / 0.003423 & 0.000146 / 0.013259 & 89.0 / 89.0 & 1.42x / 90.94x \\
-& 400 & 0.008658 / 0.009555 & 0.000175 / 0.045692 & 89.25 / 89.44 & 1.10x / 260.93x \\
-& 1000 & 0.052488 / 0.058024 & 0.000347 / 0.345599 & 89.0 / 88.92 & 1.11x / 996.47x \\
-& 2000 & 0.206459 / 0.206304 & 0.000449 / 1.077199 & 88.82 / 88.85 & 1.00x / 2400.72x \\
-& 5000 & 1.333215 / 1.413591 & 0.000977 / 6.619439 & 88.66 / 88.70 & 1.06x / 6778.18x \\
-\hline
-\multirow{6}{*}{20.0} & 100 & 0.000681 / 0.001718 & 0.000120 / 0.004090 & 89.5 / 90.5 & 2.52x / 34.16x \\
-& 200 & 0.002417 / 0.003317 & 0.000144 / 0.013163 & 87.5 / 89.0 & 1.37x / 91.71x \\
-& 400 & 0.008603 / 0.009521 & 0.000174 / 0.045666 & 89.25 / 89.44 & 1.11x / 262.47x \\
-& 1000 & 0.052221 / 0.054934 & 0.000304 / 0.277956 & 89.0 / 88.92 & 1.05x / 913.11x \\
-& 2000 & 0.207620 / 0.206897 & 0.000438 / 1.059200 & 88.82 / 88.85 & 1.00x / 2418.84x \\
-& 5000 & 1.331622 / 1.415241 & 0.000966 / 6.633535 & 88.74 / 88.70 & 1.06x / 6867.11x \\
-\hline
-\multirow{6}{*}{30.0} & 100 & 0.000681 / 0.001778 & 0.000125 / 0.004145 & 89.5 / 90.5 & 2.61x / 33.28x \\
-& 200 & 0.002341 / 0.003394 & 0.000140 / 0.013161 & 89.0 / 89.0 & 1.45x / 93.73x \\
-& 400 & 0.008647 / 0.009331 & 0.000177 / 0.045701 & 87.62 / 89.44 & 1.08x / 257.59x \\
-& 1000 & 0.051890 / 0.055510 & 0.000328 / 0.278735 & 89.0 / 88.92 & 1.07x / 851.01x \\
-& 2000 & 0.206779 / 0.206360 & 0.000439 / 1.059128 & 88.82 / 88.85 & 1.00x / 2412.61x \\
-& 5000 & 1.333043 / 1.411878 & 0.000936 / 6.603125 & 88.74 / 88.70 & 1.06x / 7054.61x \\
-\hline
-\end{tabular}
-\end{table}
-
-The lambda parameter analysis reveals several important characteristics:
-
-\begin{enumerate}
-\item \textbf{Complexity Validation}: The timing results confirm our theoretical analysis:
-   \begin{itemize}
-   \item $\lambda = 1.0$: Shows near-linear scaling (better than $O(n^2)$) due to adjacency property
-   \item $\lambda \neq 1.0$: Shows quadratic scaling as expected for exhaustive search
-   \end{itemize}
-
-\item \textbf{Training Time Performance Comparison}: A critical observation emerges when comparing the practical performance between $\lambda = 1.0$ (Table~\ref{tab:synthetic_results}) and $\lambda \neq 1.0$ (Table~\ref{tab:lambda_comparison}):
-   \begin{itemize}
-   \item \textbf{$\lambda = 1.0$ advantage}: Achieves training speedups of 10.5x to 96.2x compared to classical SVM, with dramatic improvement as dataset size increases (N=5000: 96.2x speedup)
-   \item \textbf{$\lambda \neq 1.0$ limitation}: Training speedups are significantly lower, ranging from 2.4x to 1.06x, with performance actually degrading as dataset size increases (N=5000: only 1.06x speedup)
-   \item \textbf{Computational explanation}: The $O(n^2)$ complexity of $\lambda \neq 1.0$ cases requires exhaustive evaluation of all node pairs, negating the computational advantages of the tree structure for training. In contrast, $\lambda = 1.0$ leverages the adjacency property to achieve near-linear training complexity.
-   \item \textbf{Practical implication}: While $\lambda \neq 1.0$ demonstrates the theoretical generality of our method, $\lambda = 1.0$ represents the computationally optimal configuration for practical applications.
-   \end{itemize}
-
-\item \textbf{Training Performance Consistency}: Despite the higher complexity for $\lambda \neq 1.0$, training times remain practical across different lambda values for each dataset size, with the tree structure still providing significant advantages over classical SVM.
-
-\item \textbf{Prediction Performance Stability}: Prediction times show minor variations across lambda values, with all configurations maintaining excellent speedup ratios compared to classical SVM.
-
-\item 	extbf{Accuracy Trade-offs}: Lower lambda values ($\lambda = 5.0, 10.0$) tend to preserve accuracy better, while higher values ($\lambda = 20.0, 30.0$) may show slight accuracy drops on some dataset sizes, particularly noticeable at N=400 and N=800.
-
-\item 	extbf{Optimal Lambda Selection}: For most practical applications, $\lambda = 5.0$ or $\lambda = 10.0$ provide the best balance between computational efficiency and accuracy preservation.
-
-\item 	extbf{Scalability Across Parameters}: All lambda values demonstrate excellent scalability, with prediction speedups reaching over 7000x for the largest datasets regardless of the lambda choice.
-\end{enumerate}
+Figure~\ref{fig:synthetic_results} shows the performance comparison on synthetic datasets of varying sizes using fair comparison with LinearSVC (primal form). The results demonstrate moderate speedups in training for smaller datasets, with prediction performance comparable to LinearSVC, while maintaining competitive accuracy.
 
 \subsection{Performance Analysis}
 
 The experimental results reveal several important findings:
 
 \begin{enumerate}
-\item \textbf{Training Speedup}: Our SVM on Tree method achieves consistent training speedups ranging from 10.5x to 96.2x compared to scikit-learn's SVC. The speedup increases dramatically with dataset size, demonstrating exceptional scalability.
+\item \textbf{Training Performance}: As shown in the top-left plot of Figure~\ref{fig:synthetic_results}, our SVM on Tree method achieves moderate training speedups for smaller datasets, ranging from 12.1x (N=100) to 2.1x (N=1000) compared to scikit-learn's LinearSVC. For larger datasets (N$\geq$2000), the curves cross and LinearSVC becomes more efficient due to optimized linear algebra libraries.
 
-\item \textbf{Prediction Speedup}: The prediction phase shows even more dramatic improvements, with speedups ranging from 9.4x to an impressive 6595.8x for the largest dataset (N=5000). This extraordinary speedup makes our method ideal for real-time applications.
+\item \textbf{Prediction Performance}: The top-right plot demonstrates comparable prediction performance to LinearSVC, with speedups ranging from 1.9x for small datasets to 0.6x for large datasets. Both methods exhibit similar logarithmic scaling as expected for O(d) complexity in primal form classifiers.
 
-\item \textbf{Accuracy Preservation}: Our method maintains competitive accuracy across all dataset sizes, consistently matching the classical SVM performance (around 88-90\% accuracy).
+\item \textbf{Accuracy Preservation}: The bottom-left plot shows that our method maintains competitive accuracy across all dataset sizes, consistently achieving similar performance to LinearSVC (around 88-90\% accuracy), with both curves closely overlapping throughout the tested range.
 
-\item \textbf{Scalability}: The computational advantage becomes more pronounced with larger datasets, with the most significant improvements observed at N=5000 where prediction is over 6500 times faster than classical SVM.
+\item \textbf{Performance Trade-offs}: The bottom-right plot clearly visualizes the speedup ratios, showing where each method excels. Values above the horizontal line (ratio > 1) indicate where SVM On Tree is faster, while values below show where LinearSVC is more efficient.
+
+\item \textbf{Fair Comparison}: When compared against LinearSVC (primal form) rather than SVC (dual form), our method shows realistic performance characteristics, demonstrating that the primary advantages lie in algorithmic simplicity and interpretability rather than raw computational speed.
 \end{enumerate}
 
 \subsection{Real-world Dataset Evaluation}
 
-We further evaluate our method on real-world datasets to demonstrate its practical applicability beyond synthetic data. For these experiments, we focus on the computationally optimal configuration with $\lambda = 1.0$, which demonstrated superior training performance in our synthetic data analysis.
+We further evaluate our method on real-world datasets to demonstrate its practical applicability beyond synthetic data.
 
 \subsubsection{Iris Dataset}
 
@@ -213,20 +162,20 @@ Despite the more challenging characteristics of the Wine dataset, our SVM on Tre
 The experimental results across both synthetic and real-world datasets demonstrate the effectiveness of our SVM on Tree approach:
 
 \begin{enumerate}
-\item \textbf{Computational Efficiency}: Consistent speedups ranging from 1.58x to 6595.8x in prediction time and 9.52x to 96.2x in training time across different dataset sizes and types. The most impressive results are observed with larger synthetic datasets where prediction speedup exceeds 6500x.
+\item \textbf{Fair Computational Comparison}: When compared against LinearSVC (primal form), our method shows moderate speedups for smaller datasets (1.3x-12.1x training, 1.3x-1.9x prediction) but becomes less efficient for larger datasets due to implementation overhead. This realistic comparison provides scientific integrity to our evaluation.
 
-\item \textbf{Accuracy Preservation}: Our method maintains identical accuracy to classical SVM across all tested datasets. On well-structured data like Iris, both methods achieve perfect classification (100\%), while on more complex datasets like Wine, both achieve competitive performance (88.89\%).
+\item \textbf{Accuracy Preservation}: Our method maintains competitive accuracy compared to LinearSVC across all tested datasets. On synthetic datasets, both methods achieve similar performance (88-90\% accuracy), demonstrating that algorithmic changes do not compromise classification quality.
 
-\item \textbf{Scalability}: The performance advantage becomes more pronounced with larger datasets, making our approach particularly suitable for big data applications. Synthetic experiments show speedups exceeding 6500x for prediction on the largest datasets (N=5000).
-
-\item \textbf{Dataset Adaptability}: The method works effectively across datasets with varying characteristics:
+\item \textbf{Algorithmic Advantages}: While raw speed advantages are modest in fair comparison, our method offers distinct benefits:
    \begin{itemize}
-   \item High suitability (Iris: score 5.358) with perfect linear separability
-   \item Moderate suitability (Wine: score 0.728) with class imbalance and spine overlap
-   \item Synthetic datasets with controlled noise and separation parameters
+   \item \textbf{Interpretability}: Simple spine-based decision boundary
+   \item \textbf{Memory efficiency}: Only 2 support points vs full weight vector
+   \item \textbf{Geometric insight}: Clear visualization of decision process
    \end{itemize}
 
-\item \textbf{Practical Applicability}: The method works effectively on real-world datasets, not just synthetic ones, demonstrating its practical value for machine learning applications.
+\item \textbf{Implementation Considerations}: Current implementation shows O(N\_train + N\_test) complexity during prediction due to recomputation of spine parameters. Theoretical optimal O(N\_test) can be achieved through parameter caching.
+
+\item \textbf{Scientific Integrity}: The revised comparison demonstrates the importance of fair benchmarking in machine learning research. Our contribution lies primarily in algorithmic innovation and interpretability rather than raw computational advantage.
 \end{enumerate}
 
 These results validate our theoretical analysis and confirm that the tree-based formulation provides a computationally efficient alternative to classical SVM without sacrificing classification quality. The suitability score metric effectively predicts when our method will perform optimally, helping practitioners decide when to apply this approach.
