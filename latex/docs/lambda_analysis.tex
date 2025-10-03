@@ -1,0 +1,55 @@
+\subsection{Lambda Sensitivity Analysis}
+\label{subsec:lambda_sensitivity}
+
+To understand the impact of the regularization parameter $\lambda$ on SVM On Tree performance, we conducted a comprehensive sensitivity analysis using different values of $\lambda \in \{1, 2, 5, 10, 20, 30\}$. This analysis provides insights into how the algorithm's behavior changes with varying regularization strengths.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{data/images/lambda_sensitivity_analysis.pdf}
+\caption{Lambda sensitivity analysis for SVM On Tree vs LinearSVC. The plots show: (a) Training time comparison across different $\lambda$ values, (b) Prediction time comparison, and (c) Classification accuracy comparison. Higher $\lambda$ values generally provide faster training but may affect prediction time and accuracy differently.}
+\label{fig:lambda_sensitivity}
+\end{figure}
+
+\subsubsection{Key Observations}
+
+\textbf{Training Time (Figure~\ref{fig:lambda_sensitivity}a):}
+The training time analysis reveals a critical insight about algorithmic complexity. For $\lambda = 1$, we report only the core DFS+DP time (as this case uses a specialized optimized path), while for $\lambda \neq 1$, the full training time includes the O($n^2$) pairs scanning phase for fair comparison. This explains why $\lambda = 1$ shows dramatically better training performance, particularly for larger datasets. For $\lambda \neq 1$, the algorithm maintains similar training times across different $\lambda$ values, with competitive performance against LinearSVC for smaller datasets ($N \leq 400$) but showing the O($n^2$) scaling impact for larger problems.
+
+\textbf{Prediction Time (Figure~\ref{fig:lambda_sensitivity}b):}
+The prediction time shows remarkably consistent behavior across different $\lambda$ values (excluding $\lambda = 1$). All $\lambda \neq 1$ configurations exhibit similar prediction performance, maintaining the algorithm's core advantage of cached parameters and efficient tree-based prediction. The slight variations between different $\lambda$ values are minimal and all remain competitive with LinearSVC across all dataset sizes, demonstrating the robustness of the prediction mechanism.
+
+\textbf{Classification Accuracy (Figure~\ref{fig:lambda_sensitivity}c):}
+The accuracy analysis reveals that $\lambda$ has a moderate impact on classification performance. Most $\lambda$ values maintain accuracy levels comparable to or slightly better than LinearSVC. Notably:
+\begin{itemize}
+\item $\lambda = 1$ provides consistent accuracy across all dataset sizes
+\item $\lambda = 2, 5, 10$ show similar accuracy patterns with slight improvements for medium-sized datasets
+\item Very high $\lambda$ values (20, 30) may cause slight accuracy degradation for some dataset sizes, particularly $N = 400$
+\end{itemize}
+
+\subsubsection{Practical Recommendations}
+
+Based on this sensitivity analysis, we provide the following recommendations for selecting $\lambda$:
+
+\begin{enumerate}
+\item \textbf{Optimal Performance ($\lambda = 1$):} Provides the best overall performance with specialized optimizations that avoid O($n^2$) complexity. Strongly recommended for production use due to superior training speed and prediction efficiency.
+
+\item \textbf{General Purpose ($\lambda = 2, 5, 10$):} For scenarios requiring arbitrary $\lambda$ values, these provide consistent performance with similar training and prediction characteristics. Suitable when specific regularization strengths are needed.
+
+\item \textbf{High Regularization ($\lambda \geq 20$):} Use with caution due to potential accuracy degradation on some datasets. The O($n^2$) training complexity becomes more pronounced, making these values less practical for large-scale problems.
+\end{enumerate}
+
+\subsubsection{Algorithmic Insights}
+
+The lambda sensitivity analysis provides valuable insights into the SVM On Tree algorithm's behavior:
+
+\begin{itemize}
+\item \textbf{Algorithmic Optimization:} The $\lambda = 1$ case benefits from specialized optimizations that eliminate the O($n^2$) pairs scanning phase, resulting in dramatically superior performance for large datasets.
+
+\item \textbf{Complexity Analysis:} For $\lambda \neq 1$, the algorithm requires comprehensive pairs evaluation, leading to O($n^2$) training complexity that becomes the dominant factor for large problems.
+
+\item \textbf{Prediction Consistency:} Regardless of $\lambda$ value, the prediction phase maintains consistent O($|X_{eval}|$) complexity with cached parameters, ensuring scalable inference across all configurations.
+
+\item \textbf{Regularization Impact:} Different $\lambda$ values primarily affect the optimization objective rather than the fundamental algorithmic structure, explaining the consistent behavior within each complexity class.
+\end{itemize}
+
+This analysis demonstrates that while SVM On Tree can handle arbitrary $\lambda$ values, the $\lambda = 1$ case represents the algorithm's optimal configuration, providing the best computational complexity and practical performance characteristics.
