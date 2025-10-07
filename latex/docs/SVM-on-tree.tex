@@ -3,22 +3,27 @@
 \label{sec:svm_tree}
 
 % [LE: Added comprehensive roadmap with cross-references]
-In this section, we present a novel approach to binary classification using SVM on tree structures. Our method bridges the gap between classical SVM theory and tree-based approximations, offering computational advantages while maintaining theoretical rigor. \textcolor{blue}{[LE: Added comprehensive roadmap with cross-references]}
+In this section, we present a novel approach to binary classification using SVM on tree structures. Our method offers computational advantages in training classification model.
 
-The section is organized as follows. We begin in \Cref{sec:tree-based-approximation} by constructing an augmented labeled tree from the training data that preserves essential geometric relationships. In \Cref{subsec:svm-model}, we formulate a SVM model on this tree structure, introducing concepts of noise functions and support pairs. \Cref{subsec:arbitrary-param} provides a general complexity analysis for arbitrary parameters, while \Cref{subsec:unit-param} establishes the crucial adjacency property for the unit parameter case $\lambda=1$. Finally, \Cref{subsec:algorithm} leverages these theoretical properties to propose efficient combinatorial algorithms with provable complexity bounds. % [LE: Added comprehensive roadmap with cross-references]
+The section is organized as follows. We begin in \Cref{sec:tree-based-approximation} by constructing an augmented labeled tree from the training data that preserves essential geometric relationships. In \Cref{subsec:svm-model}, we formulate a SVM model on this tree structure, introducing concepts of noise functions and support pairs. \Cref{subsec:arbitrary-param} provides a general complexity analysis for arbitrary parameters, while \Cref{subsec:unit-param} establishes the crucial adjacency property for the unit parameter. \remLE{We should add complexity to the section of arbitrary lambda and unit lambda} %Finally, \Cref{subsec:algorithm} leverages these theoretical properties to propose efficient combinatorial algorithms with provable complexity bounds. 
 
 \subsection{Tree-based approximation for data points}
 \label{sec:tree-based-approximation}
-Given a training dataset $\{(x_i,y_i)\in \mathbb{R}^d \times \{-1,+1\}: i=1,\ldots, n\}$, we describe a procedure for constructing a tree that approximates the dataset. % [LE: Fixed ellipsis]
+Consider the classification problem with points $x_i\in \mathbb{R}^d$ and labels $y_i \in \{-1,+1\}$ for $i=1,\ldots, n$. 
+We describe a procedure for constructing a tree that approximates the data points.
 
+The idea is simple, we choose an arbitrary line, here we may consider the line joining the means of two groups, then for each data point $x_i$, we find its projection on line say $x'_i$. We then consider the tree including the path connecting the projection points and the edges connecting $(x_i, x'_i)$. We refer to this structure as the augmented tree approximating the data points. By augmented tree, we mean the tree obtained by augmenting the projection line with the edges connecting each data point to its projection.
+
+
+We now detail how to construct the tree.
 Let $\Delta$ be a line in $\mathbb{R}^d$. In this work, we focus on the line $\Delta$ connecting the two class means. For each $i=1,\ldots,n$, let $x'_i$ denote the orthogonal projection of $x_i$ onto $\Delta$. The tree is then built with vertices consisting of both the original points $x_i$ and their projections $x'_i$. Its edge set includes (i) spine edges, which are the line segments connecting consecutive projection points along $\Delta$, and (ii) spoke edges, which are the line segments connecting each original point $x_i$ to its projection $x'_i$. The details of this construction are described below.
 
 
-Let $V_- = \{x_i : y_i = -1\}$ and $V_+ = \{x_i : y_i = +1\}$.
+Let $I_- = \{i\in \{1,..., n\} : y_i = -1\}$ and $I_+ = \{i \in \{1,..., n\} : y_i = +1\}$.
 The class means is:
 \begin{align*}
-\mu_- &= \frac{1}{|V_-|}\sum_{y_i=-1} x_i, \\
-\mu_+ &= \frac{1}{|V_+|}\sum_{y_i=+1} x_i.
+\mu_- &= \frac{1}{|I_-|}\sum_{i \in I_-} x_i, \\
+\mu_+ &= \frac{1}{|I_+|}\sum_{i \in I_+} x_i.
 \end{align*}
 
 The unit vector pointing the direction of the line $\Delta$ conencting the two means is
@@ -26,19 +31,18 @@ The unit vector pointing the direction of the line $\Delta$ conencting the two m
     w = \frac{\mu_+ - \mu_-}{\|\mu_+ - \mu_-\|_2}.
 \end{equation*}
 
-For each data point $x_i$, we compute its projection onto the line passing through $\mu_-$ in direction $w$
-\begin{align*}
-x_i' &= \mu_- + t_i w, \\
-t_i &= \langle x_i-\mu_-,\, w\rangle.
-\end{align*}
+For each data point $x_i$, we compute its projection onto $\Delta$ passing through $\mu_-$ in direction $w$
+\begin{equation}
+x_i' = \mu_- + t_i w \text{ where } t_i = \langle x_i-\mu_-,\, w\rangle.
+\end{equation}
 
-The projected points $\{x_i'\}$ are then sorted by their projection coordinates $t_i$. Without loss of generality, we may assume that 
+The projected points $x_i'$ are then sorted by their projection coordinates $t_i$. Without loss of generality, we may assume that 
 \begin{equation*}
     t_1 \leq \cdots \leq t_n. % [LE: Fixed ellipsis with \cdots for mathematical sequence]
 \end{equation*}
 
 
-We construct an augmented tree $T=(V,E)$ with vertex set
+We construct an augmented tree $T$ with vertex set
 \begin{equation*}
 V = \{x_1, \ldots, x_n\} \cup \{x'_1,\ldots, x'_n\}, % [LE: Fixed ellipsis in vertex set definition]
 \end{equation*}
@@ -46,11 +50,18 @@ and edge set
 \begin{equation*}
 E = \{(x'_i, x'_{i+1}): i=1,\ldots, n-1\} \cup \{(x_i, x'_i): i=1,\ldots, n\}. % [LE: Fixed ellipsis in edge set definition]
 \end{equation*}
+% Since each $x_i$ has an associated label $y_i$, we also assign label $y_i$ for $x'_i$ for all $i=1,..., n$. In general, for $v\in V$, we write $L(v)$ for its label.
+The tree $T$ is endowed with vertex labels and edge lengths as follows. Each $x_i$ and $x'_i$ inherits the original label $y_i$ for all $i=1,\ldots, n$. Each edge is assigned a length equal to the Euclidean distance between its endpoints. % [LE: Fixed ellipsis and typo in Euclidean] For any vertices $u,v \in V$, let $d(u,v)$ denote the distance between $u$ and $v$, defined as the total length of edges along the (unique) path connecting them.
 
-% [LE: Added reference to the figure]
-\textbf{Definition (Augmented tree):} The augmented tree $T$ is a connected graph structure that embeds both the original data points and their projections onto the separating direction. It consists of $2n$ vertices and $2n-1$ edges, forming a tree topology that preserves the geometric relationships between data points while enabling efficient tree-based computations. An illustration of this structure is shown in \Cref{fig:augmented-tree}. \textcolor{blue}{[LE: Added reference to the figure]} % [LE: Added reference to the figure]
+We therefore referred to $T$ as labeled augmented tree. 
+An illustration of this structure is shown in \Cref{fig:augmented-tree}. 
+\remLE{The figure should be improved. 1) $x_i$ should be located in two sides of spine and 2) we should have positive vertices (black nodes), and negative vertices (white nodes).}
 
-We refer to edges connecting two adjacent projection points as \emph{spine edges}, and to edges connecting each original point with its projection as \emph{spoke edges}. The path formed by the sequence of all spine edges is called the \emph{spine} of the tree.
+
+% The augmented tree $T$ is a connected graph structure that embeds both the original data points and their projections onto the separating direction. It consists of $2n$ vertices and $2n-1$ edges, forming a tree topology that preserves the geometric relationships between data points while enabling efficient tree-based computations.
+% \textcolor{blue}{[LE: Added reference to the figure]} % [LE: Added reference to the figure]
+
+We refer to edges connecting two adjacent projection points as \emph{spine edges}, and to edges connecting each original point with its projection as \emph{spoke edges}. The path formed by the sequence of all spine edges is called the \emph{spine} of the tree. \remLE{Check, if the concept of spine has not been used, we should remove it.}
 
 \begin{figure}[htbp]
     \centering
@@ -83,17 +94,17 @@ We refer to edges connecting two adjacent projection points as \emph{spine edges
         \node[below] at (4,-0.5) {\emph{spine}};
         \node[right] at (8.5,0.8) {\emph{spokes}};
     \end{tikzpicture}
-    \caption{Augmented tree structure showing original data points $\{x_i\}$ and their projections $\{x'_i\}$ onto the spine. The spine connects consecutive projections, while spoke edges connect each original point to its projection.}
+    \caption{Augmented tree structure showing original data points $x_i$ and their projections $x'_i$ onto the spine. The spine connects consecutive projections, while spoke edges connect each original point to its projection.}
     \label{fig:augmented-tree}
 \end{figure}
 
-The tree $T$ is endowed with vertex labels and edge lengths as follows. Each $x_i$ and $x'_i$ inherits the original label $y_i$ for all $i=1,\ldots, n$. Each edge is assigned a length equal to the Euclidean distance between its endpoints. % [LE: Fixed ellipsis and typo in Euclidean] For any vertices $u,v \in V$, let $d(u,v)$ denote the distance between $u$ and $v$, defined as the total length of edges along the (unique) path connecting them.
+
 
 Having constructed the augmented tree that embeds our data points while preserving their geometric relationships, we now formulate a SVM model that operates directly on this tree structure. This model will leverage the tree's connectivity to define support vectors and decision boundaries in a computationally efficient manner. % [LE: Added transition to SVM model section]
 
 \subsection{SVM model on tree}
 \label{subsec:svm-model}
-
+\remLE{missing definition of $V_-, V_+, V_+(u, v)$ and $V_-(u, v)$.}
 
 From classical SVM theory, we know that the formulation of the SVM model strongly relies on the support vectors, which are points with different labels. % [LE: Fixed XXX reference to classical SVM theory]
 Let $T$ be the tree constructed in \Cref{sec:tree-based-approximation}.
@@ -102,40 +113,42 @@ We focus on a pair of vertices with different labels, say
     u \in V_+ \text{ and } v \in V_-,
 \end{equation*}
 which is the analog of support vectors in the tree context.
-We seek such pairs of nodes satisfying two criteria.
+We seek such pairs of nodes satisfying two criteria. \remLE{First is to maximize the margin, second is to to minimize the loss. In the following, we will model these two quantities.}
 
 First, the margin in the classical SVM is modeled as the distance between two support nodes, say $d(u,v)$.
 
 Second, we introduce the notion of noisy nodes in the tree.
-\textbf{Definition (Noisy nodes):} Given a support pair $(u,v)$ with $u \in V_+$ and $v \in V_-$, noisy nodes are vertices that lie on the path between $u$ and $v$ but have the same label as one of the endpoints. These nodes contribute to classification errors and must be penalized in our objective function. \textcolor{blue}{[LE: Added formal definition of noisy nodes concept]} % [LE: Added formal definition of noisy nodes concept]
+Given a support pair $(u,v)$ with $u \in V_+$ and $v \in V_-$, noisy nodes are vertices that lie on the path between $u$ and $v$ \remLE{not correct} but have the same label as one of the endpoints. These nodes contribute to classification errors and must be penalized in our objective function. \textcolor{blue}{[LE: Added formal definition of noisy nodes concept]} % [LE: Added formal definition of noisy nodes concept]
 
 Consider a positive support node $u$, and among the subtrees rooted at $u$, take the branch containing the negative node $v$.
 We regard the positive nodes on the same branch as $v$ as positive noisy nodes.
 This motivates the definition of the set of positive noisy nodes, denoted by $V_+(u,v)$, as the set of positively labeled vertices in the subtree on the branch rooted at $u$ toward $v$.
 Similarly, we define $V_-(v,u)$ as the set of negatively labeled vertices on the branch rooted at $v$ toward $u$, referred to as negative noisy nodes.
+\remLE{Merge above two paragraphs.}
 
 We define the positive and negative noise function of $u$ and $v$ as follows:
 \begin{align}
 f_+(u,v) &= \sum_{z\in V_+(u,v)} d(z,u), \\
 f_-(v,u) &= \sum_{z\in V_-(v,u)} d(z,v).
 \end{align}
+It is important to note that the order of variable is important here, with $u\in V_+$ in the first location in $f_+$, while $v \in V_-$ in the first location in $f_-$.
 The total noise is
 \begin{equation*}
     f(u,v) = f_+(u,v) + f_-(v,u)
 \end{equation*}
-Note that the order of $(u, v)$ is important in the noise function $f(u,v)$, while not important in the distance function $d(u,v)$. % [LE: Replaced XXX with specific function references]
+% Note that the order of $(u, v)$ is important in the noise function $f(u,v)$, while not important in the distance function $d(u,v)$. % [LE: Replaced XXX with specific function references]
 
-We define the margin as the distance between two support vectors
-\begin{equation*}
-    d(u,v).
-\end{equation*}
-Since we aim to minimize the noise while maximizing the margin, the total loss function is defined as
+% We define the margin as the distance between two support vectors
+% \begin{equation*}
+%     d(u,v).
+% \end{equation*}
+Since we aim to minimize the noise while maximizing the margin, we define the total loss function 1as
 \begin{equation*}
     L_\lambda(u,v) = f(u,v) - \lambda \cdot d(u,v).
 \end{equation*}
 where $\lambda \geq 0$ is a parameter which controls the balance between the noise and the margin.
 
-\textbf{Definition (Support pair):} A support pair $(u,v)$ with $u \in V_+$ and $v \in V_-$ is a pair of vertices with opposite labels that minimizes the loss function $L_\lambda(u,v)$. The optimal support pair $(s^*, p^*)$ defines the decision boundary of our SVM on tree model. \textcolor{blue}{[LE: Added formal definition of support pair concept]} % [LE: Added formal definition of support pair concept]
+We define a support pair $(u, u)$, analogous to the support vectors in standard SVMs, as the pair of oppositely labeled nodes minimizing $L_\lambda(u,v)$. The \emph{decision boundary} corresponding to a support pair $(u, v)$ is the perpendicular bisector hyperplane of the segment between $u$ and $v$ in $\mathbb{R}^d$. 
 
 \begin{figure}[htbp]
     \centering
@@ -164,243 +177,27 @@ where $\lambda \geq 0$ is a parameter which controls the balance between the noi
         \node at (3,0.2) {$e_2$};
         \node at (5,0.2) {$e_3$};
     \end{tikzpicture}
-    \caption{Support pair illustration showing nodes $s$ and $p$ connected by a path with intermediate vertices and subtree nodes.}
+    \caption{Support pair illustration showing nodes $s$ and $p$ connected by a path with intermediate vertices and subtree nodes. \remLE{Fix the figure, $s$ and $p$ should not be the leaves.}}
     \label{fig:support-pair}
 \end{figure}
 
 
-The decision boundary corresponding to a support pair $(s,p)$ is the perpendicular bisector hyperplane of the segment between $s$ and $p$ in $\mathbb{R}^d$. 
 
-\textbf{Prediction procedure:} Given a new data point $x_{new}$, we classify it by determining which side of the decision boundary it lies on. Specifically, if the hyperplane bisecting the segment between support vectors $s$ and $p$ has normal vector $\vec{n} = p - s$ and passes through the midpoint $\frac{s + p}{2}$, then we classify $x_{new}$ as positive if $\langle x_{new} - \frac{s + p}{2}, p - s \rangle > 0$ and negative otherwise. \textcolor{blue}{[LE: Added detailed prediction procedure as requested]} % [LE: Added detailed prediction procedure as requested]
 
-With our SVM model on tree now formulated, we turn to the computational challenges of training such a model. The key question is how to efficiently find the optimal support pair $(s^*, p^*)$ that minimizes the loss function $L_\lambda(u,v)$. We first analyze the general case for arbitrary parameter values, then focus on the special case $\lambda=1$ which admits significant theoretical and computational simplifications. % [LE: Added transition to training sections]
+Once a suport pair has been found, we can make prediction for new data point. Given a new data point $x_{new}$, we classify it by determining which side of the decision boundary it lies on. Specifically, if the hyperplane bisecting the segment between support vectors $s$ and $p$ has normal vector $\vec{n} = p - s$ and passes through the midpoint $\frac{s + p}{2}$, then we classify $x_{new}$ as positive if $\langle x_{new} - \frac{s + p}{2}, p - s \rangle > 0$ and negative otherwise. \remLE{Quite complex rule and not intuitive, Rewrite it like: If $x_{new}$ and $u$ are in the same side--> positive label. Use $u, v$ instead of $s, p$.}
+
+With our SVM model on tree now formulated, we turn to the computational challenges of training such a model. The key question is how to efficiently find the optimal support pair that m1inimizes the loss function. We first analyze the general case for arbitrary parameter values, then focus on the special case $\lambda=1$ which admits significant theoretical and computational simplifications. 
 
 \subsection{Training SVM model on tree with arbitrary parameter}
 \label{subsec:arbitrary-param}
 
-By definition of SVM model on tree, the naive training approach for  such a model needs the evaluation of objectives for all pairs of nodes. Since there are $O(n^2)$ nodes and $O(n)$ time for computing the objective, the overall complexity for such naive approach is $O(n^3)$.
+By definition of SVM model on tree, the naive training approach for  such a model needs the evaluation of objectives for all pairs of nodes. Since there are $O(n^2)$ support pairs and $O(n)$ time for computing the objective, the overall complexity for such naive approach is $O(n^3)$.
 
-However, we can significantly improve this complexity by leveraging the tree structure and adjacency properties. % [LE: Replaced prediction comment with concrete statement about improvement]
-\begin{theorem}
-    For any $\lambda \geq 0$, we can find the support nodes in $O(n^2)$.
-\end{theorem}
+However, in this subsection, we can significantly reduce this complexity by dynamic programming. In the following, we first describe the preprocessing step. After that, we will show how to reduce the overall complexity to $O(n^2)$.
 
-\textbf{Proof idea:} The key insight is that while the distance matrix on tree can be computed in $O(n^2)$ time, the noise function $f(u, v)$ can also be computed in $O(n^2)$ time for all pairs by leveraging dynamic programming on the tree structure. This eliminates the need for $O(n^3)$ pairwise evaluations. % [LE: Replaced uncertainty comment with concrete proof approach]
-
-While the general case admits an $O(n^2)$ algorithm, we can achieve even more significant improvements by focusing on the special case $\lambda=1$. This parameter choice leads to a remarkable structural property that dramatically reduces the search space and enables linear-time preprocessing algorithms. % [LE: Added transition to unit parameter section]
-
-\subsection{Training SVM model on tree with unit parameter}
-\label{subsec:unit-param}
-
-% \subsubsection{Adjacency property for unit parameter}
-
-
-
-% \begin{figure}[htbp]
-%   \centering
-%   \begin{tikzpicture}[scale=1.5, thick]
-%     % Vertices
-%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_4$] (P4) at (0,0) {};
-%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$s$] (S) at (2,0) {};
-%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_2$] (P2) at (4,0) {};
-%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_1$] (P1) at (6,0) {};
-%     \node[draw, circle, fill=black, inner sep=2pt, label=below:$p_3$] (P3) at (4,-1.5) {};
-
-%     % Edges with labels
-%     \draw (P4) -- node[above] {$z$} (S);
-%     \draw (S) -- node[above] {$x$} (P2);
-%     \draw (P2) -- node[above] {$y$} (P1);
-%     \draw (P2) -- (P3);
-%   \end{tikzpicture}
-%   \caption{Tree structure illustrating nodes $s$, $p_1$, $p_2$, $p_3$, and $p_4$ with edge weights $x$, $y$, and $z$.}
-%   \label{fig:tree_nodes}
-% \end{figure}
-
-
-In this subsection, we establish a key theoretical properties of our SVM on tree formulation, focusing on the case $\lambda=1$. Specifically, we show that the two support nodes are adjacent and lies on the spine of the tree. 
-
-\textbf{Definition (Spine):} The spine of the augmented tree $T$ is the path connecting all projected points $x'_1, x'_2, \ldots, x'_n$ in their sorted order along the direction $w$. This forms the main backbone of our tree structure, with each original data point $x_i$ connected to its projection $x'_i$ via a spoke edge. % [LE: Added formal definition of spine concept]
-
-This fundamental property significantly reduces the search space for optimal support pairs.
-
-
-Let $s \in V_+$ and $p_1, p_2\in V_-$ such that $p_2$ is in the path connecting $s$ and $p_1$, \ie
-\begin{equation}
-    d(s, p_1) = d(s, p_2) + d(p_2, p_1)
-    \label{eq:distance-decomposition}
-\end{equation}
-Define the residual of vertex set 
-\begin{equation*}
-    R = V_-(p_1, s) \setminus V_-(p_2, s).
-\end{equation*}
-
-\textbf{Definition (Residual set):} The residual set $R$ represents the set of negatively labeled vertices that are in the noisy region for the pair $(s, p_1)$ but not for the pair $(s, p_2)$. Since $p_2$ lies on the path from $s$ to $p_1$, the set $R$ consists of vertices that become "newly included" in the noisy region when we extend the boundary from $p_2$ to $p_1$. This set is crucial for analyzing the difference in noise functions between different support pairs. \textcolor{blue}{[LE: Added formal definition of residual set concept]} % [LE: Added formal definition of residual set concept]
-
-Please refer to \Cref{fig:diff-set} for an illustration of the difference set $R$. % [LE: Removed the Vietnamese comment and added proper description] 
-
-\begin{figure}[h!]
-    \centering
-    \begin{tikzpicture}[scale=1.3, thick]
-        % Spine (horizontal line)
-        \draw[thick] (0,0) -- (8,0);
-        
-        % Projections on spine
-        \node[draw, circle, fill=black, inner sep=2pt, label=below:$s$] (S) at (2,0) {};
-        \node[draw, circle, fill=black, inner sep=2pt, label=below:$p_2$] (P2) at (5,0) {};
-        \node[draw, circle, fill=black, inner sep=2pt, label=below:$p_1$] (P1) at (7,0) {};
-        
-        % Original points (spokes)
-        \node[draw, circle, fill=black, inner sep=2pt, label=left:$x_s$] (XS) at (2,2) {};
-        \node[draw, circle, fill=black, inner sep=2pt, label=left:$x_{p_2}$] (XP2) at (5,1.8) {};
-        \node[draw, circle, fill=black, inner sep=2pt, label=right:$x_{p_1}$] (XP1) at (7,1.5) {};
-        
-        % Some additional negative points
-        \node[draw, circle, fill=black, inner sep=2pt, label=left:$x_3$] (X3) at (3.5,1.5) {};
-        \node[draw, circle, fill=black, inner sep=2pt, label=right:$x_4$] (X4) at (6,2.2) {};
-        
-        % Projections of additional points
-        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_3$] (X3P) at (3.5,0) {};
-        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_4$] (X4P) at (6,0) {};
-        
-        % Spokes (connections)
-        \draw (S) -- (XS);
-        \draw (P2) -- (XP2);
-        \draw (P1) -- (XP1);
-        \draw (X3P) -- (X3);
-        \draw (X4P) -- (X4);
-        
-        % Class labels - positioned in clear areas away from dashed lines
-        \node[font=\Large] at (1.5,2.5) {$+$};
-        \node[font=\Large] at (4.5,2.1) {$-$};
-        \node[font=\Large] at (7.2,1.9) {$-$};
-        \node[font=\Large] at (3.0,1.8) {$-$};
-        \node[font=\Large] at (6.5,2.4) {$-$};
-        
-        % Region V-(p2, s) - expanded with more space
-        \draw[dashed, thick] (1.2,-0.5) -- (1.2,3.0) -- (5.6,3.0) -- (5.6,-0.5) -- cycle;
-        \node[font=\normalsize] at (3.4,2.7) {$V_-(p_2, s)$};
-        
-        % Region V-(p1, s) - expanded with more space
-        \draw[dashed, thick] (0.8,-0.7) -- (0.8,3.4) -- (7.8,3.4) -- (7.8,-0.7) -- cycle;
-        \node[font=\normalsize] at (6.5,3.7) {$V_-(p_1, s)$};
-        
-        % Simple R label without formula
-        \node[font=\normalsize] at (8.2,1.5) {$R$};
-        
-    \end{tikzpicture}
-    \caption{Difference set $R$ illustration.}
-    \label{fig:diff-set}
-\end{figure}
-
-The following result establish the difference between the two noise functions.
-\begin{lemma}
-    We have 
-    \begin{equation*}
-    f(s, p_1) - f(s, p_2) = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1).
-\end{equation*}
-\end{lemma}
-\begin{proof}
-    Recall the definition of total noise (equations $f_+(u,v)$ and $f_-(v,u)$ defined above), we have % [LE: Fixed XXX with specific reference to noise function definitions] 
-    \begin{align*}
-        f(s, p_1) & = f_+(s, p_1) + f_-(p_1, s)\\ 
-        f(s, p_2) & = f_+(s, p_2) + f_-(p_2, s).
-    \end{align*}
-    Since $f_+(s, p_1) = f_+(s, p_2)$ (because $p_2$ lies on the path from $s$ to $p_1$, so the positive vertex set rooted at $s$ remains the same regardless of whether we consider the boundary at $p_1$ or $p_2$), % [LE: Explained why f_+(s,p_1) = f_+(s,p_2)]
-    then 
-    \begin{equation*}
-        f(s, p_1) - f(s, p_2) = f_-(p_1, s) - f_-(p_2, s).
-    \end{equation*}
-
-    Recall the definition of negative noise, we have
-    \begin{equation*}
-        f_-(p_1, s) = \sum_{v\in V_-(p_1, s)} d(v, p_1)
-    \end{equation*}
-
-
-
-    Then 
-    \begin{align*}
-        f_-(p_1, s)
-        & = \sum_{v\in V_-(p_1, s)} d(v, p_1)\\
-        & = \sum_{v\in V_-(p_2, s)} d(v, p_1) + \sum_{v\in R} d(v, p_1)\\
-        & = \sum_{v\in V_-(p_2, s)} [d(v, p_2) + d(p_2, p_1)] + \sum_{v\in R} d(v, p_1)\\
-        & = f_-(p_2, s) + d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1)
-    \end{align*}
-    or 
-    \begin{equation*}
-        f_-(p_1, s) - f_-(p_2, s) = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1).
-    \end{equation*}
-
-    
-\end{proof}
-
-
-\begin{theorem}[Adjacency Property]
-\label{thm:adjacency}
-For $\lambda = 1$, there exists an optimal support pair $(s^*,p^*)$ consisting of two adjacent vertices on the spine.
-\end{theorem}
-
-% [LE: Explained why p_2 exists when s and p_1 are not adjacent]
-\begin{proof}
-    We prove by contradiction.
-    Let $s \in V_+$ and $p_1 \in V_-$ and $(s, p_1)$ is optimal but not adjacent, \ie there exists $p_2 \in V_-$ on the path connecting $s$ and $p_1$ with $p_2 \neq s, p_1$ (since $(s, p_1)$ is not adjacent, there must be intermediate vertices on the unique tree path between them). \textcolor{blue}{[LE: Explained why $p_2$ exists when $s$ and $p_1$ are not adjacent]} % [LE: Explained why p_2 exists when s and p_1 are not adjacent] 
-
-
-    Now, we aim to show that $(s, p_2)$ is also optimal but having $p_2$ closer to $s$ in a comparison with $p_1$.
-    To this end, we consider 
-    \begin{align*}
-        L_1(s, p_1) - L_1(s, p_2) 
-        & = f(s, p_1) - f(s, p_2) - (d(s, p_1) -d(s, p_2))\\
-        & = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1) - d(p_2, p_1)\\
-        & = d(p_2, p_1) (|V_-(p_2,s)| - 1) + \sum_{v\in R} d(v, p_1).
-    \end{align*}
-    Since $V_-(p_2,s)$ contains at least a vertex (say $p_1$), we should have $|V_-(p_2,s)| - 1 \geq 0$. Thus, we obtain the nonnegativity. Therefore, 
-    \begin{equation*}
-        L_1(s, p_1) \geq L_1(s, p_2).
-    \end{equation*}
-    Since $(s, p_1)$ is optimal, $(s, p_2)$ is also optimal. This completes the proof.
-
-    \textit{Proof that optimal pairs lie on the spine:} % [LE: Detailed explanation as requested]
-    Note that there exists an optimal pair $(s^*, p^*)$ lying on the spine. Otherwise, assume that $p^*$ is not on the spine, \ie it is an original data point. Let $p'$ be its projection onto the spine. Since $p'$ has the same label as $p^*$ and lies closer to $s^*$, the pair $(s^*, p')$ achieves the same or lower loss than $(s^*, p^*)$, making it also optimal. If $s^*$ is not on the spine, we apply the same argument by projecting $s^*$ onto the spine.     By iteratively projecting both endpoints if necessary, we obtain an optimal pair entirely on the spine.
-\end{proof}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.4, thick]
-        % Spine with sorted projections - simple black circles
-        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_1$] (X1) at (0,0) {};
-        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_2$] (X2) at (1.5,0) {};
-        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_3$] (X3) at (3,0) {};
-        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_4$] (X4) at (4.5,0) {};
-        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_5$] (X5) at (6,0) {};
-        
-        % Spine edges
-        \draw (X1) -- (X2) -- (X3) -- (X4) -- (X5);
-        
-        % Highlight adjacent pairs
-        \draw[thick] (X2) -- (X3);
-        \draw[thick] (X4) -- (X5);
-        
-        % Class labels above nodes
-        \node[above] at (X1) {$+$};
-        \node[above] at (X2) {$+$};
-        \node[above] at (X3) {$-$};
-        \node[above] at (X4) {$+$};
-        \node[above] at (X5) {$-$};
-    \end{tikzpicture}
-    \caption{Adjacency property: optimal support pairs are adjacent on spine.}
-    \label{fig:adjacency}
-\end{figure}
-
-The adjacency property established in Theorem~\ref{thm:adjacency} is the cornerstone of our efficient algorithm. By restricting the search space to adjacent pairs on the spine, we reduce the problem from considering $O(n^2)$ potential support pairs to only $O(n)$ candidates. This dramatic reduction in complexity enables us to design practical algorithms with strong theoretical guarantees, as illustrated in \Cref{fig:adjacency}. % [LE: Added reference to adjacency figure]
-
-\subsection{Algorithm and Complexity Analysis}
-\label{subsec:algorithm}
-
-In this section, we focus on the  design of an efficient algorithm for training SVM model on tree with $\lambda=1$.
-
-\subsubsection{Preprocessing} 
-\label{sec:preprocessing} % [LE: Added section label for reference] 
+\remLE{Preprocessing step}
+% \subsubsection{Preprocessing} 
+% \label{sec:preprocessing} % [LE: Added section label for reference] 
 
 Recall $x'_1, \ldots,x'_n$ are projections of $x_1,\ldots, x_n$ and we assume that $x'_1, \ldots,x'_n$ have been sorted in a certain order, \eg by their first coordinates. By the adjacency property (Theorem~\ref{thm:adjacency}), we know that support vectors form a pair $(x'_i, x'_{i+1})$ with opposite signs. % [LE: Fixed ellipsis and XXX reference] The margin is clearly $d(x'_i, x'_{i+1}) = \|x'_i - x'_{i+1}\|_2$.
 To compute the total loss, we only need $f(x'_i, x'_{i+1})$ for $i=1,.., n-1$. In the following, we will clarify how to compute these values efficiently using dynamic programming.
@@ -527,6 +324,226 @@ Extending above proposition, we obtain the following result.
 \end{proof}
 
 
+
+\remLE{Complexity analysis here}
+
+\begin{theorem}
+    For any $\lambda \geq 0$, we can find the support nodes in $O(n^2)$.
+\end{theorem}
+
+\textbf{Proof idea:} The key insight is that while the distance matrix on tree can be computed in $O(n^2)$ time, the noise function $f(u, v)$ can also be computed in $O(n^2)$ time for all pairs by leveraging dynamic programming on the tree structure. This eliminates the need for $O(n^3)$ pairwise evaluations.\remLE{I think we should clarify how to do dynamic programming here, based on the preprocessing steps.}
+
+While the general case admits an $O(n^2)$ algorithm, we can achieve even more significant improvements by focusing on the special case $\lambda=1$. This parameter choice leads to a remarkable structural property that dramatically reduces the search space and enables linear-time preprocessing algorithms. 
+
+\subsection{Training SVM model on tree with unit parameter}
+\label{subsec:unit-param}
+
+% \subsubsection{Adjacency property for unit parameter}
+
+
+
+% \begin{figure}[htbp]
+%   \centering
+%   \begin{tikzpicture}[scale=1.5, thick]
+%     % Vertices
+%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_4$] (P4) at (0,0) {};
+%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$s$] (S) at (2,0) {};
+%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_2$] (P2) at (4,0) {};
+%     \node[draw, circle, fill=black, inner sep=2pt, label=above:$p_1$] (P1) at (6,0) {};
+%     \node[draw, circle, fill=black, inner sep=2pt, label=below:$p_3$] (P3) at (4,-1.5) {};
+
+%     % Edges with labels
+%     \draw (P4) -- node[above] {$z$} (S);
+%     \draw (S) -- node[above] {$x$} (P2);
+%     \draw (P2) -- node[above] {$y$} (P1);
+%     \draw (P2) -- (P3);
+%   \end{tikzpicture}
+%   \caption{Tree structure illustrating nodes $s$, $p_1$, $p_2$, $p_3$, and $p_4$ with edge weights $x$, $y$, and $z$.}
+%   \label{fig:tree_nodes}
+% \end{figure}
+
+
+In this subsection, we establish a key theoretical properties of our SVM on tree formulation, focusing on the case $\lambda=1$. Specifically, we show that the two support nodes are adjacent and lies on the spine of the tree. 
+
+\textbf{Definition (Spine):} The spine of the augmented tree $T$ is the path connecting all projected points $x'_1, x'_2, \ldots, x'_n$ in their sorted order along the direction $w$. This forms the main backbone of our tree structure, with each original data point $x_i$ connected to its projection $x'_i$ via a spoke edge. \remLE{Already define}
+
+This fundamental property significantly reduces the search space for optimal support pairs. \remLE{remove this sentence?!}
+
+
+Let $s \in V_+$ and $p_1, p_2\in V_-$ such that $p_2$ is in the path connecting $s$ and $p_1$, \ie
+\begin{equation}
+    d(s, p_1) = d(s, p_2) + d(p_2, p_1)
+    \label{eq:distance-decomposition}
+\end{equation}
+
+Define the \emph{residual} of vertex set 
+\begin{equation*}
+    R = V_-(p_1, s) \setminus V_-(p_2, s).
+\end{equation*}
+The residual set $R$ represents the set of negatively labeled vertices that are in the noisy region for the pair $(s, p_1)$ but not for the pair $(s, p_2)$. Since $p_2$ lies on the path from $s$ to $p_1$, the set $R$ consists of vertices that become "newly included" in the noisy region when we extend the boundary from $p_2$ to $p_1$. This set is crucial for analyzing the difference in noise functions between different support pairs. %\textcolor{blue}{[LE: Added formal definition of residual set concept]} % [LE: Added formal definition of residual set concept]
+
+Please refer to \Cref{fig:diff-set} for an illustration of the residual set $R$. % [LE: Removed the Vietnamese comment and added proper description] 
+
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}[scale=1.3, thick]
+        % Spine (horizontal line)
+        \draw[thick] (0,0) -- (8,0);
+        
+        % Projections on spine
+        \node[draw, circle, fill=black, inner sep=2pt, label=below:$s$] (S) at (2,0) {};
+        \node[draw, circle, fill=black, inner sep=2pt, label=below:$p_2$] (P2) at (5,0) {};
+        \node[draw, circle, fill=black, inner sep=2pt, label=below:$p_1$] (P1) at (7,0) {};
+        
+        % Original points (spokes)
+        \node[draw, circle, fill=black, inner sep=2pt, label=left:$x_s$] (XS) at (2,2) {};
+        \node[draw, circle, fill=black, inner sep=2pt, label=left:$x_{p_2}$] (XP2) at (5,1.8) {};
+        \node[draw, circle, fill=black, inner sep=2pt, label=right:$x_{p_1}$] (XP1) at (7,1.5) {};
+        
+        % Some additional negative points
+        \node[draw, circle, fill=black, inner sep=2pt, label=left:$x_3$] (X3) at (3.5,1.5) {};
+        \node[draw, circle, fill=black, inner sep=2pt, label=right:$x_4$] (X4) at (6,2.2) {};
+        
+        % Projections of additional points
+        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_3$] (X3P) at (3.5,0) {};
+        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_4$] (X4P) at (6,0) {};
+        
+        % Spokes (connections)
+        \draw (S) -- (XS);
+        \draw (P2) -- (XP2);
+        \draw (P1) -- (XP1);
+        \draw (X3P) -- (X3);
+        \draw (X4P) -- (X4);
+        
+        % Class labels - positioned in clear areas away from dashed lines
+        \node[font=\Large] at (1.5,2.5) {$+$};
+        \node[font=\Large] at (4.5,2.1) {$-$};
+        \node[font=\Large] at (7.2,1.9) {$-$};
+        \node[font=\Large] at (3.0,1.8) {$-$};
+        \node[font=\Large] at (6.5,2.4) {$-$};
+        
+        % Region V-(p2, s) - expanded with more space
+        \draw[dashed, thick] (1.2,-0.5) -- (1.2,3.0) -- (5.6,3.0) -- (5.6,-0.5) -- cycle;
+        \node[font=\normalsize] at (3.4,2.7) {$V_-(p_2, s)$};
+        
+        % Region V-(p1, s) - expanded with more space
+        \draw[dashed, thick] (0.8,-0.7) -- (0.8,3.4) -- (7.8,3.4) -- (7.8,-0.7) -- cycle;
+        \node[font=\normalsize] at (6.5,3.7) {$V_-(p_1, s)$};
+        
+        % Simple R label without formula
+        \node[font=\normalsize] at (8.2,1.5) {$R$};
+        
+    \end{tikzpicture}
+    \caption{Difference set $R$ illustration. \remLE{change style of nodes to white (positive) and black (negative)}}
+    \label{fig:diff-set}
+\end{figure}
+
+The following result establish the difference between the two noise functions.
+\begin{lemma}
+    We have 
+    \begin{equation*}
+    f(s, p_1) - f(s, p_2) = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1).
+\end{equation*}
+\end{lemma}
+\begin{proof}
+    Recall the definition of total noise (equations $f_+(u,v)$ and $f_-(v,u)$ defined above), we have % [LE: Fixed XXX with specific reference to noise function definitions] 
+    \begin{align*}
+        f(s, p_1) & = f_+(s, p_1) + f_-(p_1, s)\\ 
+        f(s, p_2) & = f_+(s, p_2) + f_-(p_2, s).
+    \end{align*}
+    Since $f_+(s, p_1) = f_+(s, p_2)$ (because $p_2$ lies on the path from $s$ to $p_1$, so the positive vertex set rooted at $s$ remains the same regardless of whether we consider the boundary at $p_1$ or $p_2$), % [LE: Explained why f_+(s,p_1) = f_+(s,p_2)]
+    then 
+    \begin{equation*}
+        f(s, p_1) - f(s, p_2) = f_-(p_1, s) - f_-(p_2, s).
+    \end{equation*}
+
+    Recall the definition of negative noise, we have
+    \begin{equation*}
+        f_-(p_1, s) = \sum_{v\in V_-(p_1, s)} d(v, p_1)
+    \end{equation*}
+
+
+
+    Then 
+    \begin{align*}
+        f_-(p_1, s)
+        & = \sum_{v\in V_-(p_1, s)} d(v, p_1)\\
+        & = \sum_{v\in V_-(p_2, s)} d(v, p_1) + \sum_{v\in R} d(v, p_1)\\
+        & = \sum_{v\in V_-(p_2, s)} [d(v, p_2) + d(p_2, p_1)] + \sum_{v\in R} d(v, p_1)\\
+        & = f_-(p_2, s) + d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1)
+    \end{align*}
+    or 
+    \begin{equation*}
+        f_-(p_1, s) - f_-(p_2, s) = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1).
+    \end{equation*}
+
+    
+\end{proof}
+
+
+\begin{theorem}[Adjacency Property]
+\label{thm:adjacency}
+For $\lambda = 1$, there exists an optimal support pair $(s^*,p^*)$ consisting of two adjacent vertices on the spine.
+\end{theorem}
+
+% [LE: Explained why p_2 exists when s and p_1 are not adjacent]
+\begin{proof}
+    We prove by contradiction.
+    Let $s \in V_+$ and $p_1 \in V_-$ and $(s, p_1)$ is optimal but not adjacent, \ie there exists $p_2 \in V_-$ on the path connecting $s$ and $p_1$ with $p_2 \neq s, p_1$ (since $(s, p_1)$ is not adjacent, there must be intermediate vertices on the unique tree path between them). \textcolor{blue}{[LE: Explained why $p_2$ exists when $s$ and $p_1$ are not adjacent]} % [LE: Explained why p_2 exists when s and p_1 are not adjacent] 
+
+
+    Now, we aim to show that $(s, p_2)$ is also optimal but having $p_2$ closer to $s$ in a comparison with $p_1$.
+    To this end, we consider 
+    \begin{align*}
+        L_1(s, p_1) - L_1(s, p_2) 
+        & = f(s, p_1) - f(s, p_2) - (d(s, p_1) -d(s, p_2))\\
+        & = d(p_2, p_1) |V_-(p_2,s)| + \sum_{v\in R} d(v, p_1) - d(p_2, p_1)\\
+        & = d(p_2, p_1) (|V_-(p_2,s)| - 1) + \sum_{v\in R} d(v, p_1).
+    \end{align*}
+    Since $V_-(p_2,s)$ contains at least a vertex (say $p_1$), we should have $|V_-(p_2,s)| - 1 \geq 0$. Thus, we obtain the nonnegativity. Therefore, 
+    \begin{equation*}
+        L_1(s, p_1) \geq L_1(s, p_2).
+    \end{equation*}
+    Since $(s, p_1)$ is optimal, $(s, p_2)$ is also optimal. This completes the proof.
+
+    \textit{Proof that optimal pairs lie on the spine:} % [LE: Detailed explanation as requested]
+    Note that there exists an optimal pair $(s^*, p^*)$ lying on the spine. Otherwise, assume that $p^*$ is not on the spine, \ie it is an original data point. Let $p'$ be its projection onto the spine. Since $p'$ has the same label as $p^*$ and lies closer to $s^*$, the pair $(s^*, p')$ achieves the same or lower loss than $(s^*, p^*)$, making it also optimal. If $s^*$ is not on the spine, we apply the same argument by projecting $s^*$ onto the spine.     By iteratively projecting both endpoints if necessary, we obtain an optimal pair entirely on the spine.
+\end{proof}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.4, thick]
+        % Spine with sorted projections - simple black circles
+        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_1$] (X1) at (0,0) {};
+        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_2$] (X2) at (1.5,0) {};
+        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_3$] (X3) at (3,0) {};
+        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_4$] (X4) at (4.5,0) {};
+        \node[draw, circle, fill=black, inner sep=2pt, label=below:$x'_5$] (X5) at (6,0) {};
+        
+        % Spine edges
+        \draw (X1) -- (X2) -- (X3) -- (X4) -- (X5);
+        
+        % Highlight adjacent pairs
+        \draw[thick] (X2) -- (X3);
+        \draw[thick] (X4) -- (X5);
+        
+        % Class labels above nodes
+        \node[above] at (X1) {$+$};
+        \node[above] at (X2) {$+$};
+        \node[above] at (X3) {$-$};
+        \node[above] at (X4) {$+$};
+        \node[above] at (X5) {$-$};
+    \end{tikzpicture}
+    \caption{Adjacency property: optimal support pairs are adjacent on spine.}
+    \label{fig:adjacency}
+\end{figure}
+
+The adjacency property established in Theorem~\ref{thm:adjacency} is the cornerstone of our efficient algorithm. By restricting the search space to adjacent pairs on the spine, we reduce the problem from considering $O(n^2)$ potential support pairs to only $O(n)$ candidates. This dramatic reduction in complexity enables us to design practical algorithms with strong theoretical guarantees, as illustrated in \Cref{fig:adjacency}. % [LE: Added reference to adjacency figure]
+
+\subsection{Algorithm and Complexity Analysis}
+\label{subsec:algorithm}
+
+In this section, we focus on the  design of an efficient algorithm for training SVM model on tree with $\lambda=1$.
 
 % \subsubsection{Dynamic Programming for Objective Evaluation}
 
