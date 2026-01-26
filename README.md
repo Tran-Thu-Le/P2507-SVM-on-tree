@@ -2,7 +2,7 @@
 
 Fast and efficient implementation of SVM On Tree algorithm using C++ with Python bindings via pybind11. This implementation provides significant speedup compared to traditional SVM while maintaining competitive accuracy.
 
-## 📊 Project Information
+## Project Information
 
 - **Title**: Fast SVM on Tree
 - **Abstract**: 
@@ -11,18 +11,18 @@ Fast and efficient implementation of SVM On Tree algorithm using C++ with Python
   - Our method achieves faster training and prediction times
   - Competitive accuracy with scikit-learn's SVC on suitable datasets
   
-## 👥 Authors
+## Authors
 - Cong-Huan Tran (First author)
 - Ngan Nguyen
 - Khanh-Duy Le
 - Thu-Le Tran (Corresponding author)
 
-## 📅 Timeline
+## Timeline
 - 14/07/2025: Initialized project
 - 14-30/07/2025: Development and writing
 - Deadline: 10/2025
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.8+
@@ -75,7 +75,7 @@ cd python/any_lambda
 ./run_benchmark_2n.sh
 ```
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 P2507-SVM-on-tree/
@@ -95,7 +95,7 @@ P2507-SVM-on-tree/
 └── .venv/                   # Virtual environment (not in repo)
 ```
 
-## 🔧 Thread Pinning (Important)
+## Thread Pinning (Important)
 
 For fair comparison with scikit-learn, pin threads to 1:
 ```bash
@@ -106,14 +106,14 @@ export VECLIB_MAXIMUM_THREADS=1
 ```
 This is automatically done in the provided shell scripts.
 
-## 🧪 Verify Installation
+## Verify Installation
 
 Test the C++ module:
 ```bash
-python -c "import svm_on_tree_cpp; print('✓ Module loaded successfully')"
+python -c "import svm_on_tree_cpp; print('Module loaded successfully')"
 ```
 
-## 📈 Benchmark Examples
+## Benchmark Examples
 
 ### Run with custom parameters
 ```bash
@@ -132,7 +132,7 @@ Speedup: 3.0x
 ...
 ```
 
-## 🛠 Troubleshooting
+## Troubleshooting
 
 ### Build fails with "pybind11 not found"
 ```bash
@@ -152,7 +152,7 @@ Ensure thread pinning is active:
 echo $OMP_NUM_THREADS  # Should output: 1
 ```
 
-## 📝 Citation
+## Citation
 
 If you use this code in your research, please cite:
 
@@ -165,10 +165,6 @@ If you use this code in your research, please cite:
 }
 ```
 
-## 📄 License
-
-MIT License - See LICENSE file for details
-
-## 📧 Contact
+## Contact
 
 For questions or issues, please open a GitHub issue or contact the corresponding author.
