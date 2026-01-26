@@ -1,84 +1,174 @@
-# Project Infor 
+# SVM On Tree - Fast C++ Implementation
 
-## Project infor
+Fast and efficient implementation of SVM On Tree algorithm using C++ with Python bindings via pybind11. This implementation provides significant speedup compared to traditional SVM while maintaining competitive accuracy.
 
-- Title: Fast SVM on tree 
-- Abstract:
-    - SVM is important 
-    - Solving SVM is time consuming 
-    - We approximate the points with a tree
-    - We then propose a new fast computing method for SVM on tree 
+## 📊 Project Information
 
-## Authors 
+- **Title**: Fast SVM on Tree
+- **Abstract**: 
+  - Support Vector Machines (SVM) are powerful but computationally expensive
+  - We approximate data points with a tree structure
+  - Our method achieves faster training and prediction times
+  - Competitive accuracy with scikit-learn's SVC on suitable datasets
+  
+## 👥 Authors
 - Cong-Huan Tran (First author)
-- Ngan Nguyen 
-- Khanh-Duy Le 
-- Thu-Le Tran (Corresponding author) 
+- Ngan Nguyen
+- Khanh-Duy Le
+- Thu-Le Tran (Corresponding author)
 
-## Time 
-- 14/07/2025: Ininitilized project 
-- 14->30 07/2025: Writing
-- Deadline: 10/2025 
+## 📅 Timeline
+- 14/07/2025: Initialized project
+- 14-30/07/2025: Development and writing
+- Deadline: 10/2025
 
-## Code 
-- Code in python
+## 🚀 Quick Start
 
-# 📄 How to Run `benchmark_svm_tree_vs_svc_2n.py` from Scratch
+### Prerequisites
+- Python 3.8+
+- C++17 compatible compiler
+- macOS, Linux, or Windows
 
-## Install Anaconda (if not installed)
-Download and install Anaconda:  
-🔗 https://www.anaconda.com/download
+### Installation
 
-## Create and activate a new Python environment
-Open **Terminal** (Mac / Linux) or **Anaconda Prompt** (Windows) and run:
+#### Option 1: Using virtual environment (Recommended)
 ```bash
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # On macOS/Linux
+# .venv\Scripts\activate   # On Windows
+
+# Install dependencies
+pip install --upgrade pip
+pip install pybind11 numpy scikit-learn matplotlib pandas
+
+# Build the C++ extension (in python/any_lambda/)
+cd python/any_lambda
+python setup.py build_ext --inplace --force
+```
+
+#### Option 2: Using Anaconda
+```bash
+# Create and activate conda environment
 conda create -n svmtree python=3.10 -y
 conda activate svmtree
-```
 
-## Install required dependencies
-```bash
+# Install dependencies
 pip install pybind11 numpy scikit-learn matplotlib pandas
+
+# Build the C++ extension
+cd python/any_lambda
+python setup.py build_ext --inplace --force
 ```
 
-## Build the C++ module `svm_on_tree_cpp`
-Go to the **python** directory in the repo:
+### Running Benchmarks
+
+#### Complete benchmark (multiple datasets)
 ```bash
-cd python
-pip install -e .
+cd python/any_lambda
+./run_benchmark.sh
 ```
-This will compile `src/svm_on_tree.cpp` into the Python module `svm_on_tree_cpp` and install it into the current environment.
 
-## Verify the module installation
+#### 2N parametric benchmark (scaling test)
 ```bash
-python -c "import svm_on_tree_cpp as m; print('OK:', m.fit_core)"
+cd python/any_lambda
+./run_benchmark_2n.sh
 ```
-If you see something like:
-```
-OK: <built-in method fit_core ...>
-```
-then the C++ module has been built successfully.
 
-## Run the benchmark script
-Go back to the repository root and run:
+## 📁 Repository Structure
+
+```
+P2507-SVM-on-tree/
+├── README.md                 # This file
+├── .gitignore               # Git ignore rules
+├── python/
+│   └── any_lambda/          # Main implementation
+│       ├── src/
+│       │   └── svm_on_tree_lambda_any.cpp  # C++ core
+│       ├── setup.py         # Build configuration
+│       ├── complete_benchmark.py
+│       ├── benchmark_svm_tree_vs_svc_2n.py
+│       ├── run_benchmark.sh
+│       └── run_benchmark_2n.sh
+├── plots/                   # Benchmark results
+├── latex/                   # Paper and documentation
+└── .venv/                   # Virtual environment (not in repo)
+```
+
+## 🔧 Thread Pinning (Important)
+
+For fair comparison with scikit-learn, pin threads to 1:
 ```bash
-cd ..
-python python/benchmark_svm_tree_vs_svc_2n.py --sizes 50 100 200 500 1000 2000 --repeats 7 > python/logs/run.txt
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export VECLIB_MAXIMUM_THREADS=1
 ```
-Arguments:
-- `--sizes`: list of N values to test (number of training points).
-- `--repeats`: number of repetitions for averaging results.
+This is automatically done in the provided shell scripts.
 
-## Expected output
-The script will print:
-- **Training time (FIT)** for SVM On Tree and sklearn SVC.
-- **Prediction time (PRED)**.
-- **Accuracy (ACC)** for each method.
-- **Speedup** factor.
+## 🧪 Verify Installation
 
-Example:
+Test the C++ module:
+```bash
+python -c "import svm_on_tree_cpp; print('✓ Module loaded successfully')"
 ```
-N=   100 | Tree-Spine: ACC=0.9000, SVC: ACC=0.8950
-Speedup PRED (Spine vs SVC): 15.45x
+
+## 📈 Benchmark Examples
+
+### Run with custom parameters
+```bash
+cd python/any_lambda
+python benchmark_svm_tree_vs_svc_2n.py \
+  --sizes 100 200 500 1000 2000 \
+  --repeats 7 \
+  --lamda 10000.0 \
+  --standardize 0
+```
+
+### Expected Output
+```
+N=  100 | Tree: ACC=0.9000, Time=0.05s | SVC: ACC=0.8950, Time=0.15s
+Speedup: 3.0x
 ...
 ```
+
+## 🛠 Troubleshooting
+
+### Build fails with "pybind11 not found"
+```bash
+pip install pybind11
+```
+
+### Import error: "svm_on_tree_cpp not found"
+Make sure you built the extension in the correct directory:
+```bash
+cd python/any_lambda
+python setup.py build_ext --inplace --force
+```
+
+### Performance issues
+Ensure thread pinning is active:
+```bash
+echo $OMP_NUM_THREADS  # Should output: 1
+```
+
+## 📝 Citation
+
+If you use this code in your research, please cite:
+
+```bibtex
+@software{svm_on_tree_2025,
+  title = {SVM On Tree: Fast C++ Implementation},
+  author = {Tran, Cong-Huan and Nguyen, Ngan and Le, Khanh-Duy and Tran, Thu-Le},
+  year = {2025},
+  url = {https://github.com/Tran-Thu-Le/P2507-SVM-on-tree}
+}
+```
+
+## 📄 License
+
+MIT License - See LICENSE file for details
+
+## 📧 Contact
+
+For questions or issues, please open a GitHub issue or contact the corresponding author.

@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "SVM On Tree: Fast C++ Implementation with Python Bindings"
+authors:
+  - family-names: "Tran"
+    given-names: "Cong-Huan"
+  - family-names: "Nguyen"
+    given-names: "Ngan"
+  - family-names: "Le"
+    given-names: "Khanh-Duy"
+  - family-names: "Tran"
+    given-names: "Thu-Le"
+repository-code: "https://github.com/Tran-Thu-Le/P2507-SVM-on-tree"
+url: "https://github.com/Tran-Thu-Le/P2507-SVM-on-tree"
+abstract: "Fast and efficient implementation of SVM On Tree algorithm using C++ with Python bindings via pybind11. This implementation provides a fair comparison with scikit-learn's SVC on various datasets."
+keywords:
+  - machine-learning
+  - svm
+  - support-vector-machine
+  - optimization
+  - cpp
+  - python
+  - pybind11
+license: MIT
+version: 0.1.0
+date-released: "2025-01-26"

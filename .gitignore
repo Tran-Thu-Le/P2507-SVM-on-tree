@@ -6,6 +6,8 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
+env/
+ENV/
 .env
 .ipynb_checkpoints/
 
@@ -24,11 +26,37 @@ dist/
 .DS_Store
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
 # CMake / scikit-build
 _CMake_build/
 *.cache/
 
-# latex
+# LaTeX auxiliary files
 latex/.aux/*
 *.latexmkrc
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.backup
+
+# Temporary and log files
+*.tmp
+*.bak
+logs/
+*.csv
+
+# Data files (if large)
+*.npy
+*.npz
+*.pkl
+*.pickle
+
+# GitHub ready folder (staging area)
+github_ready/
