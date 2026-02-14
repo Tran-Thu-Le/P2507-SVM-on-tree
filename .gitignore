@@ -60,3 +60,12 @@ logs/
 
 # GitHub ready folder (staging area)
 github_ready/
+
+# Output plots (generated, not tracked)
+output/
+
+# Old project folders (not part of clean repo)
+latex/
+python/
+plots/
+P25_SVM_on_tree.pdf
