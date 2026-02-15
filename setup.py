@@ -16,7 +16,7 @@ elif sys.platform.startswith("win"):
 
 ext = Extension(
     "svm_on_tree_cpp",
-    sources=["src/svm_on_tree_lambda_any.cpp"],  # path relative to any_lambda/
+    sources=["src/svm_on_tree_lambda_any.cpp"],
     include_dirs=inc,
     language="c++",
     extra_compile_args=extra_compile_args,
@@ -25,7 +25,7 @@ ext = Extension(
 setup(
     name="svm_on_tree_cpp",
     version="0.1.0",
-    description="SVM On Tree core in C++ (pybind11) - fair benchmark version",
+    description="SVM On Tree C++ core with pybind11 bindings",
     ext_modules=[ext],
     zip_safe=False,
 )
