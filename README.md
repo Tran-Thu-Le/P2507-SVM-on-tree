@@ -2,7 +2,7 @@
 
 C++ implementation (with Python/pybind11 bindings) of the **SVM On Tree** algorithm described in:
 
-> *SVM on Tree* — C.-H. Tran, N. Nguyen, K.-D. Le, K.-T. Nguyen, T.-L. Tran*
+> *SVM on Tree* — C.-H. Tran, K.-D. Le, N. Nguyen, K.-T. Nguyen, T.-L. Tran*
 
 ## Repository structure
 
